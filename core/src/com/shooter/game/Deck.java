@@ -52,8 +52,8 @@ public class Deck {
 			Shuffle();
 		}
 		Hit(0);
-		Hit(0);
-		Hit(1);
+		Hit(0); // Player = 0
+		Hit(1); // Dealer = 1
 	}
 
 	public void Hit(int player) {
