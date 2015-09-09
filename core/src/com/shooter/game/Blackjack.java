@@ -1,5 +1,8 @@
 package com.shooter.game;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
@@ -11,29 +14,16 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.scenes.scene2d.Action;
-import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.Event;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.actions.DelayAction;
-import com.badlogic.gdx.scenes.scene2d.actions.SequenceAction;
-import com.badlogic.gdx.scenes.scene2d.ui.Button;
-import com.badlogic.gdx.scenes.scene2d.ui.ButtonGroup;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField.TextFieldStyle;
-import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
-import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener.ChangeEvent;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.badlogic.gdx.utils.StringBuilder;
 
 public class Blackjack extends ApplicationAdapter {
 	private OrthographicCamera camera; // make a camera
@@ -42,7 +32,7 @@ public class Blackjack extends ApplicationAdapter {
 	private int screenWidth;
 	private int screenHeight;
 	
-	private Texture cardSS;
+	private Texture cardSpriteSheet;
 	private Sprite[][] cards = new Sprite[4][13];
 	
 	private Stage stage;
@@ -52,16 +42,18 @@ public class Blackjack extends ApplicationAdapter {
 	private Deck deck;
 	
 	private int playerTotal;
-	private int aiTotal;
+	private int dealerTotal;
 	private int playerBalance;
 	
-	private Label pScore;
-	private Label aScore;
-	private Label pCash;
-	private Label pBet;
+	private Label playerScore;
+	private Label dealerScore;
+	private Label playerCash;
+	private Label playerBet;
 	private Label result;
 	
 	private boolean playing; // trigger to turn on/off buttons based on game state.
+	
+	private HashMap<String, Runnable> buttonMap = new HashMap<String, Runnable>();
 	
 	@Override
 	public void create () {	
@@ -70,19 +62,19 @@ public class Blackjack extends ApplicationAdapter {
 		playing = false;
 		playerBalance = 500;
 		playerTotal = 0;
-		aiTotal = 0;
+		dealerTotal = 0;
 		
 		batch = new SpriteBatch();
 		stage = new Stage(); // set up the stage so i can add buttons
 		
 		// load the background 
-        background = new Texture(Gdx.files.internal("marion_co_gaming_table_felt_blackjack.jpg"));
+        background = new Texture(Gdx.files.internal("table.jpg"));
         screenWidth = background.getWidth();
 		screenHeight = background.getHeight();
 		
         // load the card sprite sheet
-        cardSS = new Texture(Gdx.files.internal("deck-of-playing-cards-all.png"));
-        deck = new Deck(cardSS);
+        cardSpriteSheet = new Texture(Gdx.files.internal("deck-of-playing-cards-all.png"));
+        deck = new Deck(cardSpriteSheet);
         
         
 		// set up a camera, set to background size.
@@ -98,82 +90,67 @@ public class Blackjack extends ApplicationAdapter {
 		Pixmap pixmap = new Pixmap(100, 50, Format.RGBA8888); // sets the button default size
 		pixmap.setColor(Color.CYAN); // button default color
 		pixmap.fill();
-		skin.add("btnskin", new Texture(pixmap)); // make the button skin using the pixmap
+		skin.add("buttonskin", new Texture(pixmap)); // make the button skin using the pixmap
  
 		pixmap.setColor(Color.WHITE);
 		pixmap.fill();
-		skin.add("tfskin", new Texture(pixmap));
+		skin.add("textFieldSkin", new Texture(pixmap));
 		
 		
 		// Store the default libgdx font under the name "default".
-		BitmapFont bfont = new BitmapFont();
-		skin.add("default",bfont);
+		BitmapFont bitmapfont = new BitmapFont();
+		skin.add("default",bitmapfont);
  
 		// make the button style  
-		TextButtonStyle tbs = new TextButtonStyle();
-		tbs.up = skin.newDrawable("btnskin", Color.LIGHT_GRAY); // the way the button will look
-		tbs.down = skin.newDrawable("btnskin", Color.WHITE); // when it's clicked
-		tbs.font = skin.getFont("default");
+		TextButtonStyle textButtonStyle = new TextButtonStyle();
+		textButtonStyle.up = skin.newDrawable("buttonskin", Color.LIGHT_GRAY); // the way the button will look
+		textButtonStyle.down = skin.newDrawable("buttonskin", Color.WHITE); // when it's clicked
+		textButtonStyle.font = skin.getFont("default");
  
 		
 		// make the textfield style
-		TextFieldStyle tfs = new TextFieldStyle();
-		tfs.background = skin.newDrawable("tfskin", Color.WHITE);
-		tfs.fontColor = Color.BLACK;
-		tfs.font = new BitmapFont();	
+		TextFieldStyle textFieldStyle = new TextFieldStyle();
+		textFieldStyle.background = skin.newDrawable("textFieldSkin", Color.WHITE);
+		textFieldStyle.fontColor = Color.BLACK;
+		textFieldStyle.font = new BitmapFont();	
 		
 		
 		// make the label style
-		LabelStyle ls = new LabelStyle();
-		ls.font = new BitmapFont();
+		LabelStyle lableStyle = new LabelStyle();
+		lableStyle.font = new BitmapFont();
 		
 		
 	  // making the UI
 		// the labels (hand totals and cash)
-		pScore = new Label("Player: ", ls);
-		pScore.setPosition(500, 25);
-		aScore = new Label("Dealer: ", ls);
-		aScore.setPosition(500, 275);
-		pCash = new Label("Cash: " + playerBalance, ls);
-		pCash.setPosition(50, 100);
-		pBet = new Label("Bet: ", ls);
-		pBet.setPosition(50, 80);
-		result = new Label(" ", ls);
+		playerScore = new Label("Player: ", lableStyle);
+		playerScore.setPosition(500, 25);
+		dealerScore = new Label("Dealer: ", lableStyle);
+		dealerScore.setPosition(500, 275);
+		playerCash = new Label("Cash: " + playerBalance, lableStyle);
+		playerCash.setPosition(50, 100);
+		playerBet = new Label("Bet: ", lableStyle);
+		playerBet.setPosition(50, 80);
+		result = new Label(" ", lableStyle);
 		result.setPosition(500, 150);
-			
-		// the DEAL button
-		final TextButton dealButton = new TextButton("Deal",tbs);
-		dealButton.setPosition(20, 20);
- 
-		dealButton.addListener(new ClickListener() {
-			public void clicked(InputEvent event, float x, float y) {
-		        Deal();
-		    }			
+	
+		//add Buttons to map
+		buttonMap.put("hitButton", new Runnable() {
+				public void run() { hit();}
+			});
+		buttonMap.put("dealButton", new Runnable() {
+			public void run() { deal();}
+		});
+		buttonMap.put("standButton", new Runnable() {
+			public void run() { stand();}
 		});
 		
-		// the HIT button
-		final TextButton hitButton = new TextButton("Hit",tbs);
-		hitButton.setPosition(130, 20);
- 
-		hitButton.addListener(new ClickListener() {
-			public void clicked(InputEvent event, float x, float y) {
-		        Hit();
-		    }			
-		});
-
-		// the STAND button
-		final TextButton standButton = new TextButton("Stand",tbs);
-		standButton.setPosition(240, 20);
- 
-		standButton.addListener(new ClickListener() {
-			public void clicked(InputEvent event, float x, float y) {
-		        Stand();
-		    }			
-		});
-
+		// make buttons
+		final TextButton standButton = getButton("Stand", 240, 20, "standButton", textButtonStyle);
+		final TextButton hitButton = getButton("Hit", 130, 20, "hitButton", textButtonStyle);
+		final TextButton dealButton = getButton("Deal", 20, 20, "dealButton", textButtonStyle);
 		
 		// the bet/text field
-		betField = new TextField("",tfs);
+		betField = new TextField("100",textFieldStyle);
 		//betField.setText("test");
 		//betField.setMessageText("0");
 		betField.setPosition(100, 75);
@@ -187,13 +164,25 @@ public class Blackjack extends ApplicationAdapter {
 		stage.addActor(betField);
 		
 		// add the labels to the stage
-		stage.addActor(pScore);
-		stage.addActor(aScore);
-		stage.addActor(pBet);
-		stage.addActor(pCash);
+		stage.addActor(playerScore);
+		stage.addActor(dealerScore);
+		stage.addActor(playerBet);
+		stage.addActor(playerCash);
 		stage.addActor(result);
         
 		
+	}
+
+	private TextButton getButton(String buttonText, int xPosition, int yPosition, final String id, TextButtonStyle textButtonStyle) {
+		TextButton button = new TextButton(buttonText, textButtonStyle);
+		button.setPosition(xPosition, yPosition);
+ 
+		button.addListener(new ClickListener() {
+			public void clicked(InputEvent event, float x, float y) {
+		        buttonMap.get(id).run();
+		    }			
+		});
+		return button;
 	}
 
 	@Override
@@ -212,7 +201,7 @@ public class Blackjack extends ApplicationAdapter {
 		
 	}
 	
-	public void Deal(){
+	public void deal(){
 		//System.out.println("dealt! bet = " + betField.getText());
 		if (!playing){
 			playing = true;
@@ -222,7 +211,7 @@ public class Blackjack extends ApplicationAdapter {
 		}
 	}
 	
-	public void Hit(){
+	public void hit(){
 		//System.out.println("hit!");
 		if (playing){
 			deck.Hit(0);
@@ -230,11 +219,11 @@ public class Blackjack extends ApplicationAdapter {
 		}
 	}
 	
-	public void Stand(){
+	public void stand(){
 		//System.out.println("stand!");
 		// dealer will draw to 17. updateScores() also evaluates bust conditions.
 		if (playing){
-			while (aiTotal <=17){
+			while (dealerTotal <=17){
 				deck.Hit(1);
 				updateScores();
 			}
@@ -245,17 +234,17 @@ public class Blackjack extends ApplicationAdapter {
 			
 			if (playing){
 				int betAmount = Integer.parseInt(betField.getText());
-				if (aiTotal > playerTotal){
+				if (dealerTotal > playerTotal){
 					result.setText("DEALER WINS! -" + betAmount);
 					playerBalance -= betAmount;
-				} else if (aiTotal < playerTotal){
+				} else if (dealerTotal < playerTotal){
 					result.setText("YOU WIN! +" + betAmount);
 					playerBalance += betAmount;
-				} else if (aiTotal == playerTotal){
+				} else if (dealerTotal == playerTotal){
 					result.setText("PUSH! + 0");
 				}
 			}
-			pCash.setText("Player: "+ playerBalance);
+			playerCash.setText("Player: "+ playerBalance);
 			playing = false;
 		}
 			
@@ -263,30 +252,30 @@ public class Blackjack extends ApplicationAdapter {
 	
 	public void updateScores(){
 		playerTotal = 0;
-		aiTotal = 0;
+		dealerTotal = 0;
 		int betAmount = Integer.parseInt(betField.getText());
 		
 		// display the player's hand and evaluate win/loss conditions
-		for(Card c : deck.phand){
-			playerTotal += c.getValue();
-			pScore.setText("Player: "+ playerTotal);
+		for(Card card : deck.playerHand){
+			playerTotal += card.getValue();
+			playerScore.setText("Player: "+ playerTotal);
 			if (playerTotal >21){
 				result.setText("BUST! -" + betAmount);
 				playing = false;
 				playerBalance -= betAmount;
-				pCash.setText("Player: "+ playerBalance);
+				playerCash.setText("Player: "+ playerBalance);
 			}
 		}
 		
 		// display the dealer's hand and win/loss conditions
-		for(Card c : deck.ahand){
-			aiTotal += c.getValue();
-			aScore.setText("Dealer: "+ aiTotal);
-			if (aiTotal >21){
+		for(Card card : deck.dealerHand){
+			dealerTotal += card.getValue();
+			dealerScore.setText("Dealer: "+ dealerTotal);
+			if (dealerTotal >21){
 				result.setText("DEALER BUST! +" + betAmount);
 				playing = false;
 				playerBalance += betAmount;
-				pCash.setText("Player: "+ playerBalance);
+				playerCash.setText("Player: "+ playerBalance);
 			}
 		}
 
