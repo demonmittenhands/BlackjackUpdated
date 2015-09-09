@@ -11,7 +11,5 @@ public class DesktopLauncher {
 		config.height = 451;
         config.width = 1096;
 		new LwjglApplication(new Blackjack(), config);
-        
-
 	}
 }

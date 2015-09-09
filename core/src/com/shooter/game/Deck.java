@@ -13,8 +13,8 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 public class Deck {
 	
 	List<Card> cards = new ArrayList<Card>();
-	List<Card> phand = new ArrayList<Card>();
-	List<Card> ahand = new ArrayList<Card>();
+	List<Card> playerHand = new ArrayList<Card>();
+	List<Card> dealerHand = new ArrayList<Card>();
 	
 	int cardIndex; // which card we're looking at in the deck. top of the deck!
 	
@@ -23,9 +23,9 @@ public class Deck {
 		
 		for (int i = 0; i < 4; i++){
 			for (int j = 0; j < 13; j++){
-				Sprite s = new Sprite(tmp[i][j], 2, 2, cardSheet.getWidth()/13-2, cardSheet.getHeight()/4-2);
-				Card c = new Card(i, j, s);
-				cards.add(c);
+				Sprite sprite = new Sprite(tmp[i][j], 2, 2, cardSheet.getWidth()/13-2, cardSheet.getHeight()/4-2);
+				Card card = new Card(i, j, sprite);
+				cards.add(card);
 			}
 		}
 		Shuffle();
@@ -45,8 +45,8 @@ public class Deck {
 	public void Deal(){
 		// run Hit three times.
 		// need to shuffle if less than 11 cards		
-		phand.clear();
-		ahand.clear();
+		playerHand.clear();
+		dealerHand.clear();
 		
 		if (cardIndex >=42){
 			Shuffle();
@@ -66,29 +66,29 @@ public class Deck {
 		// put the card with the rest of the player's hand
 		if (player == 0){
 			yPos = 50;
-			xPos = 500 + 20*(phand.size());
+			xPos = 500 + 20*(playerHand.size());
 		} else {
 			yPos = 300;
-			xPos = 500 + 20*(ahand.size());
+			xPos = 500 + 20*(dealerHand.size());
 		}
 		
 		
 		c.SetPosition(xPos, yPos); // put the card where it should be
 		if (player == 0){
-			phand.add(c);
+			playerHand.add(c);
 		} else {
-			ahand.add(c);
+			dealerHand.add(c);
 		}
 		cardIndex++;
 	}
 
 	public void draw(SpriteBatch batch) {
 		// call the card method in each card that's been dealt
-		for(Card c : ahand){
-			c.draw(batch);
+		for(Card card : dealerHand){
+			card.draw(batch);
 		}
-		for(Card c : phand){
-			c.draw(batch);
+		for(Card card : playerHand){
+			card.draw(batch);
 		}
 		
 	}
