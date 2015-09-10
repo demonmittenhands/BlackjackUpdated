@@ -36,6 +36,7 @@ public class Blackjack extends ApplicationAdapter {
 	private Sprite[][] cards = new Sprite[4][13];
 	
 	private Stage stage;
+	private Stage titleStage;
 	private Skin skin;
 	private TextField betField;
 
@@ -52,6 +53,7 @@ public class Blackjack extends ApplicationAdapter {
 	private Label result;
 	
 	private boolean playing; // trigger to turn on/off buttons based on game state.
+	private boolean titleScreen = true; //toggle to load titlescreen
 	
 	private HashMap<String, Runnable> buttonMap = new HashMap<String, Runnable>();
 	
@@ -60,12 +62,13 @@ public class Blackjack extends ApplicationAdapter {
 		
 	 // setting up the game and the cards
 		playing = false;
-		playerBalance = 500;
+		//playerBalance = 500;
 		playerTotal = 0;
 		dealerTotal = 0;
 		
 		batch = new SpriteBatch();
 		stage = new Stage(); // set up the stage so i can add buttons
+		titleStage = new Stage(); //set up stage for the title screen
 		
 		// load the background 
         background = new Texture(Gdx.files.internal("table.jpg"));
@@ -143,11 +146,24 @@ public class Blackjack extends ApplicationAdapter {
 		buttonMap.put("standButton", new Runnable() {
 			public void run() { stand();}
 		});
+		buttonMap.put("easyMode", new Runnable() {
+			public void run() { difficulty(1);}
+		});
+		buttonMap.put("mediumMode", new Runnable() {
+			public void run() { difficulty(2);}
+		});
+		buttonMap.put("hardMode", new Runnable() {
+			public void run() { difficulty(3);}
+		});
+		
 		
 		// make buttons
 		final TextButton standButton = getButton("Stand", 240, 20, "standButton", textButtonStyle);
 		final TextButton hitButton = getButton("Hit", 130, 20, "hitButton", textButtonStyle);
 		final TextButton dealButton = getButton("Deal", 20, 20, "dealButton", textButtonStyle);
+		final TextButton easyMode = getButton("Easy", 20, 20, "easyMode", textButtonStyle);
+		final TextButton mediumMode = getButton("Normal", 130, 20, "mediumMode", textButtonStyle);
+		final TextButton hardMode = getButton("Hard", 240, 20, "hardMode", textButtonStyle);
 		
 		// the bet/text field
 		betField = new TextField("100",textFieldStyle);
@@ -162,6 +178,9 @@ public class Blackjack extends ApplicationAdapter {
 		stage.addActor(hitButton);
 		stage.addActor(standButton);
 		stage.addActor(betField);
+		titleStage.addActor(easyMode);
+		titleStage.addActor(mediumMode);
+		titleStage.addActor(hardMode);
 		
 		// add the labels to the stage
 		stage.addActor(playerScore);
@@ -189,16 +208,33 @@ public class Blackjack extends ApplicationAdapter {
 	public void render () {
 		Gdx.gl.glClearColor(1, 0, 0, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-		
-		Gdx.input.setInputProcessor(stage); // this NEEDS to be here. so stage can have events
-
+				
 		batch.begin();
 		batch.draw(background, 0, 0);
 		deck.draw(batch);
 		batch.end();
 		
-		stage.draw();
+		if(titleScreen){
+			Gdx.input.setInputProcessor(titleStage); // this NEEDS to be here. so stage can have events
+			titleStage.draw(); 
+		} else {
+			Gdx.input.setInputProcessor(stage); // this NEEDS to be here. so stage can have events
+			stage.draw(); 
+		}
 		
+	}
+	
+	public void difficulty(int diff){
+		if(diff == 1)
+			playerBalance = 5000;
+		else if (diff == 2)
+			playerBalance = 2500;
+		else
+			playerBalance = 500;
+		
+		playerCash.setText("Player: "+ playerBalance);
+		titleScreen = false;
+
 	}
 	
 	public void deal(){
