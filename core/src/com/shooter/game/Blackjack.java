@@ -29,6 +29,7 @@ public class Blackjack extends ApplicationAdapter {
 	private OrthographicCamera camera; // make a camera
 	private SpriteBatch batch;
 	private Texture background;
+	private Texture titleBackground;
 	private int screenWidth;
 	private int screenHeight;
 	
@@ -72,6 +73,7 @@ public class Blackjack extends ApplicationAdapter {
 		
 		// load the background 
         background = new Texture(Gdx.files.internal("table.jpg"));
+        titleBackground = new Texture(Gdx.files.internal("TitleScreen.png"));
         screenWidth = background.getWidth();
 		screenHeight = background.getHeight();
 		
@@ -210,7 +212,10 @@ public class Blackjack extends ApplicationAdapter {
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 				
 		batch.begin();
-		batch.draw(background, 0, 0);
+		if(titleScreen)
+			batch.draw(titleBackground, 0, 0);
+		else
+			batch.draw(background, 0, 0);
 		deck.draw(batch);
 		batch.end();
 		
