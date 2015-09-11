@@ -114,9 +114,5 @@ public class Deck {
 
 	}
 
-	public void clearHands() {
-		playerHand.clear();
-		dealerHand.clear();
-	}
 }
 

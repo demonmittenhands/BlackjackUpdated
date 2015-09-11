@@ -2,7 +2,6 @@ package com.shooter.game;
 
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
@@ -13,7 +12,6 @@ import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Pixmap.Format;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -36,7 +34,6 @@ public class Blackjack extends ApplicationAdapter {
 	private int screenHeight;
 	
 	private Texture cardSpriteSheet;
-	private Sprite[][] cards = new Sprite[4][13];
 		
 	private Stage stage;
 	private Stage titleStage;
@@ -226,11 +223,14 @@ public class Blackjack extends ApplicationAdapter {
 		batch.begin();
 		if(titleScreen)
 			batch.draw(titleBackground, 0, 0);
-		else if(gameOverScreen)
+		else if(gameOverScreen){
 			batch.draw(gameOverBackground, 0, 0);
-		else
+		}
+		else{
 			batch.draw(background, 0, 0);
-		deck.draw(batch);
+			deck.draw(batch);
+		}
+		
 		batch.end();
 		
 		if(titleScreen){
@@ -363,9 +363,6 @@ public class Blackjack extends ApplicationAdapter {
 			}
 			if(playerBalance <= 0){
 				gameOverScreen = true;
-				//deck.clearHands();
-				//deck.playerHand.clear();
-				//deck.dealerHand.clear();
 			}
 		}
 		
