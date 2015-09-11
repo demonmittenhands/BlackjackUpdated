@@ -54,15 +54,8 @@ public class Deck {
 		}
 	}
 	
-	
-		
-<<<<<<< HEAD
-	public void Deal(){
-		// run Hit four times.
-=======
 	public void deal(){
-		// run Hit three times.
->>>>>>> 1916a2c067fc6acdc0e2d36aa9011a5dc3ed5ebc
+		// run hit four times.
 		// need to shuffle if less than 11 cards		
 		playerHand.clear();
 		dealerHand.clear();
@@ -70,16 +63,11 @@ public class Deck {
 		if (cardIndex >=42){
 			shuffle();
 		}
-<<<<<<< HEAD
-		Hit(0); // Player = 0
-		Hit(0); 
-		Hit(1); // Dealer = 1
-		Hit(1); 
-=======
-		hit(0);
+		
 		hit(0); // Player = 0
+		hit(0); 
 		hit(1); // Dealer = 1
->>>>>>> 1916a2c067fc6acdc0e2d36aa9011a5dc3ed5ebc
+		hit(1); 
 	}
 
 	public void hit(int player) {
@@ -125,15 +113,10 @@ public class Deck {
 	public void stand(){
 
 	}
-<<<<<<< HEAD
-=======
 
 	public void clearHands() {
 		playerHand.clear();
 		dealerHand.clear();
 	}
-
-
->>>>>>> 1916a2c067fc6acdc0e2d36aa9011a5dc3ed5ebc
 }
 

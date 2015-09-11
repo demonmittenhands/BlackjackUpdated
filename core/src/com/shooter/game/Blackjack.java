@@ -270,13 +270,10 @@ public class Blackjack extends ApplicationAdapter {
 	private void deal(){
 		if (!playing){
 			playing = true;
-<<<<<<< HEAD
 			deck.resetAceValue(); //reset the ace values back to 11 for each deal
-			deck.Deal();
-			deck.holeCard.setCover(true);
-=======
 			deck.deal();
->>>>>>> 1916a2c067fc6acdc0e2d36aa9011a5dc3ed5ebc
+			deck.holeCard.setCover(true);
+			deck.deal();
 			updateScores();
 			result.setText(" ");
 		}
@@ -289,21 +286,13 @@ public class Blackjack extends ApplicationAdapter {
 		}
 	}
 	
-<<<<<<< HEAD
 	public void stand(){
 		//System.out.println("stand!");
 		// dealer will draw to 16, will stand on all 17's. updateScores() also evaluates bust conditions.
 		if (playing){
 			deck.holeCard.setCover(false);
 			while (dealerTotal < 17){
-				deck.Hit(1);
-=======
-	private void stand(){
-		// dealer will draw to 17. updateScores() also evaluates bust conditions.
-		if (playing){
-			while (dealerTotal <=17){
 				deck.hit(1);
->>>>>>> 1916a2c067fc6acdc0e2d36aa9011a5dc3ed5ebc
 				updateScores();
 			}
 			
@@ -325,7 +314,7 @@ public class Blackjack extends ApplicationAdapter {
 			playerCash.setText("Player: "+ playerBalance);
 			playing = false;
 		}
-<<<<<<< HEAD
+
 			
 	}
 	
@@ -347,10 +336,7 @@ public class Blackjack extends ApplicationAdapter {
 				break;
 			}
 		}
-	}
-=======
 	}	
->>>>>>> 1916a2c067fc6acdc0e2d36aa9011a5dc3ed5ebc
 	
 	private void updateScores(){
 		playerTotal = 0;
@@ -373,6 +359,7 @@ public class Blackjack extends ApplicationAdapter {
 			else if (playerTotal > 21){
 				result.setText("BUST! -" + betAmount);
 				playing = false;
+				deck.holeCard.setCover(false);
 				playerBalance -= betAmount;
 				playerCash.setText("Player: "+ playerBalance);
 			}
