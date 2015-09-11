@@ -1,6 +1,7 @@
 package com.shooter.game;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.badlogic.gdx.ApplicationAdapter;
@@ -35,7 +36,7 @@ public class Blackjack extends ApplicationAdapter {
 	
 	private Texture cardSpriteSheet;
 	private Sprite[][] cards = new Sprite[4][13];
-	
+		
 	private Stage stage;
 	private Stage titleStage;
 	private Skin skin;
@@ -80,7 +81,6 @@ public class Blackjack extends ApplicationAdapter {
         // load the card sprite sheet
         cardSpriteSheet = new Texture(Gdx.files.internal("deck-of-playing-cards-all.png"));
         deck = new Deck(cardSpriteSheet);
-        
         
 		// set up a camera, set to background size.
 		camera = new OrthographicCamera();
@@ -246,7 +246,9 @@ public class Blackjack extends ApplicationAdapter {
 		//System.out.println("dealt! bet = " + betField.getText());
 		if (!playing){
 			playing = true;
+			deck.resetAceValue(); //reset the ace values back to 11 for each deal
 			deck.Deal();
+			deck.holeCard.setCover(true);
 			updateScores();
 			result.setText(" ");
 		}
@@ -262,9 +264,10 @@ public class Blackjack extends ApplicationAdapter {
 	
 	public void stand(){
 		//System.out.println("stand!");
-		// dealer will draw to 17. updateScores() also evaluates bust conditions.
+		// dealer will draw to 16, will stand on all 17's. updateScores() also evaluates bust conditions.
 		if (playing){
-			while (dealerTotal <=17){
+			deck.holeCard.setCover(false);
+			while (dealerTotal < 17){
 				deck.Hit(1);
 				updateScores();
 			}
@@ -289,18 +292,47 @@ public class Blackjack extends ApplicationAdapter {
 			playing = false;
 		}
 			
-	}	
+	}
+	
+	//does the hand contain an ace? T or F
+	public boolean hasAce(List<Card> hand) {
+		for(Card temp : hand){ 
+			if (temp.getRank() == "ACE" && temp.getValue() == 11) {
+				return true;
+			}
+		}
+		return false;	
+	}
+	
+	//goes through the deck and will change the value of a single ace (currently valued at 11) to 1.
+	public void changeAceValue(List<Card> hand) {
+		for(Card temp : hand){ 
+			if (temp.getRank() == "ACE" && temp.getValue() == 11) {
+				temp.setValue(1);
+				break;
+			}
+		}
+	}
 	
 	public void updateScores(){
 		playerTotal = 0;
 		dealerTotal = 0;
 		int betAmount = Integer.parseInt(betField.getText());
+		boolean playerHasAce = hasAce(deck.playerHand);
+		boolean dealerHasAce = hasAce(deck.dealerHand);
 		
 		// display the player's hand and evaluate win/loss conditions
 		for(Card card : deck.playerHand){
 			playerTotal += card.getValue();
 			playerScore.setText("Player: "+ playerTotal);
-			if (playerTotal >21){
+
+			if (playerTotal > 21 && playerHasAce){
+				changeAceValue(deck.playerHand);
+				playerTotal -= 10; //Ace gets the value of 1
+				playerScore.setText("Player: "+ playerTotal);
+				playerHasAce = false;
+			}
+			else if (playerTotal > 21){
 				result.setText("BUST! -" + betAmount);
 				playing = false;
 				playerBalance -= betAmount;
@@ -312,7 +344,14 @@ public class Blackjack extends ApplicationAdapter {
 		for(Card card : deck.dealerHand){
 			dealerTotal += card.getValue();
 			dealerScore.setText("Dealer: "+ dealerTotal);
-			if (dealerTotal >21){
+			
+			if (dealerTotal > 21 && dealerHasAce){
+				changeAceValue(deck.playerHand);
+				dealerTotal -= 10;
+				dealerScore.setText("Dealer: "+ dealerTotal);
+				dealerHasAce = false;
+			}
+			else if (dealerTotal > 21) {
 				result.setText("DEALER BUST! +" + betAmount);
 				playing = false;
 				playerBalance += betAmount;
@@ -321,5 +360,7 @@ public class Blackjack extends ApplicationAdapter {
 		}
 
 	} // end updateScores()
+	
+	
 	
 }

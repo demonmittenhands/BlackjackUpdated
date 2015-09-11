@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -15,6 +16,9 @@ public class Deck {
 	List<Card> cards = new ArrayList<Card>();
 	List<Card> playerHand = new ArrayList<Card>();
 	List<Card> dealerHand = new ArrayList<Card>();
+	
+	Sprite cardBack = new Sprite(new Texture(Gdx.files.internal("cardBack.png")));
+	HoleCard holeCard = new HoleCard(cardBack);
 	
 	int cardIndex; // which card we're looking at in the deck. top of the deck!
 	
@@ -41,9 +45,19 @@ public class Deck {
 			System.out.println(c.toString());
 		}
 	}
+	
+	public void resetAceValue(){
+		for(Card c : cards){
+			if(c.getRank() == "ACE"){
+				c.setValue(11);
+			}
+		}
+	}
+	
+	
 		
 	public void Deal(){
-		// run Hit three times.
+		// run Hit four times.
 		// need to shuffle if less than 11 cards		
 		playerHand.clear();
 		dealerHand.clear();
@@ -51,9 +65,10 @@ public class Deck {
 		if (cardIndex >=42){
 			Shuffle();
 		}
-		Hit(0);
 		Hit(0); // Player = 0
+		Hit(0); 
 		Hit(1); // Dealer = 1
+		Hit(1); 
 	}
 
 	public void Hit(int player) {
@@ -87,6 +102,9 @@ public class Deck {
 		for(Card card : dealerHand){
 			card.draw(batch);
 		}
+		if (holeCard.isCover() == true){
+			holeCard.draw(batch);
+		}
 		for(Card card : playerHand){
 			card.draw(batch);
 		}
@@ -96,7 +114,5 @@ public class Deck {
 	public void Stand(){
 
 	}
-
-
 }
 

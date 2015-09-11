@@ -20,7 +20,9 @@ public class Card {
 		this.sprite = s;
 		this.rank = Rank.values()[rank];
 		this.suit = Suit.values()[suit];
-		if (rank < 9)
+		if (rank == 0) //based on the location in the enum, 'ACE' is in the zeroth index
+			this.value = 11;
+		else if (rank < 9 && rank != 0)
 			this.value = rank + 1;
 		else
 			this.value = 10;
@@ -36,5 +38,13 @@ public class Card {
 	
 	public int getValue(){
 		return value;
+	}
+	
+	public void setValue(int value){
+		this.value = value;
+	}
+	
+	public String getRank(){
+		return rank.toString();
 	}
 }
