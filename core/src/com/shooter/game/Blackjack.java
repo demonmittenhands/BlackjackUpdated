@@ -270,9 +270,8 @@ public class Blackjack extends ApplicationAdapter {
 	private void deal(){
 		if (!playing){
 			playing = true;
-			deck.resetAceValue(); //reset the ace values back to 11 for each deal
-			deck.deal();
-			deck.holeCard.setCover(true);
+			deck.resetAceValue(); 			//reset the ace values back to 11 for each deal
+			deck.holeCard.setCover(true); 	//the hole card will cover up the dealer's second card
 			deck.deal();
 			updateScores();
 			result.setText(" ");
@@ -287,15 +286,14 @@ public class Blackjack extends ApplicationAdapter {
 	}
 	
 	public void stand(){
-		//System.out.println("stand!");
 		// dealer will draw to 16, will stand on all 17's. updateScores() also evaluates bust conditions.
 		if (playing){
-			deck.holeCard.setCover(false);
+			deck.holeCard.setCover(false);		//Dealer can now reveal the hole card
 			while (dealerTotal < 17){
 				deck.hit(1);
 				updateScores();
 			}
-			
+			updateScores();						//necessary to reveal the dealer's total if the hole card put his value over 17
 			
 			// if nobody bust. busted? bustered...
 			// then playing == true. now we evaluate who won based on card values.
@@ -372,7 +370,7 @@ public class Blackjack extends ApplicationAdapter {
 		}
 		
 		// display the dealer's hand and win/loss conditions
-		for(Card card : deck.dealerHand){
+		for(Card card : deck.dealerHand){				
 			dealerTotal += card.getValue();
 			dealerScore.setText("Dealer: "+ dealerTotal);
 			
@@ -387,6 +385,11 @@ public class Blackjack extends ApplicationAdapter {
 				playing = false;
 				playerBalance += betAmount;
 				playerCash.setText("Player: "+ playerBalance);
+			}
+			
+			//will only display the value of the faced up card (the one in position 0) as long as holeCard is true (visible)
+			if(deck.holeCard.isCover()){
+				dealerScore.setText("Dealer: " + deck.dealerHand.get(0).getValue());
 			}
 		}
 
