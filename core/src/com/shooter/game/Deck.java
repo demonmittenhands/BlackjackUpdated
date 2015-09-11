@@ -28,10 +28,10 @@ public class Deck {
 				cards.add(card);
 			}
 		}
-		Shuffle();
+		shuffle();
 	}
 	
-	public void Shuffle(){
+	public void shuffle(){
 		Collections.shuffle(cards);
 		cardIndex = 0;
 	}
@@ -42,26 +42,26 @@ public class Deck {
 		}
 	}
 		
-	public void Deal(){
+	public void deal(){
 		// run Hit three times.
 		// need to shuffle if less than 11 cards		
 		playerHand.clear();
 		dealerHand.clear();
 		
 		if (cardIndex >=42){
-			Shuffle();
+			shuffle();
 		}
-		Hit(0);
-		Hit(0); // Player = 0
-		Hit(1); // Dealer = 1
+		hit(0);
+		hit(0); // Player = 0
+		hit(1); // Dealer = 1
 	}
 
-	public void Hit(int player) {
+	public void hit(int player) {
 		// put the card out, based on player
 		// update total
 		int yPos;
 		int xPos;
-		Card c = cards.get(cardIndex);
+		Card card = cards.get(cardIndex);
 		
 		// put the card with the rest of the player's hand
 		if (player == 0){
@@ -73,11 +73,11 @@ public class Deck {
 		}
 		
 		
-		c.SetPosition(xPos, yPos); // put the card where it should be
+		card.SetPosition(xPos, yPos); // put the card where it should be
 		if (player == 0){
-			playerHand.add(c);
+			playerHand.add(card);
 		} else {
-			dealerHand.add(c);
+			dealerHand.add(card);
 		}
 		cardIndex++;
 	}
@@ -93,8 +93,13 @@ public class Deck {
 		
 	}
 	
-	public void Stand(){
+	public void stand(){
 
+	}
+
+	public void clearHands() {
+		playerHand.clear();
+		dealerHand.clear();
 	}
 
 

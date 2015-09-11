@@ -1,6 +1,7 @@
 package com.shooter.game;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.badlogic.gdx.ApplicationAdapter;
@@ -30,6 +31,7 @@ public class Blackjack extends ApplicationAdapter {
 	private SpriteBatch batch;
 	private Texture background;
 	private Texture titleBackground;
+	private Texture gameOverBackground;
 	private int screenWidth;
 	private int screenHeight;
 	
@@ -38,6 +40,7 @@ public class Blackjack extends ApplicationAdapter {
 	
 	private Stage stage;
 	private Stage titleStage;
+	private Stage gameOverStage;
 	private Skin skin;
 	private TextField betField;
 
@@ -55,6 +58,7 @@ public class Blackjack extends ApplicationAdapter {
 	
 	private boolean playing; // trigger to turn on/off buttons based on game state.
 	private boolean titleScreen = true; //toggle to load titlescreen
+	private boolean gameOverScreen = false; // will be toggled on when player loses
 	
 	private HashMap<String, Runnable> buttonMap = new HashMap<String, Runnable>();
 	
@@ -70,10 +74,13 @@ public class Blackjack extends ApplicationAdapter {
 		batch = new SpriteBatch();
 		stage = new Stage(); // set up the stage so i can add buttons
 		titleStage = new Stage(); //set up stage for the title screen
+		gameOverStage = new Stage(); // set up stage for the game over screen
+		
 		
 		// load the background 
         background = new Texture(Gdx.files.internal("table.jpg"));
         titleBackground = new Texture(Gdx.files.internal("TitleScreen.png"));
+        gameOverBackground = new Texture(Gdx.files.internal("gameOver.jpg"));
         screenWidth = background.getWidth();
 		screenHeight = background.getHeight();
 		
@@ -85,9 +92,7 @@ public class Blackjack extends ApplicationAdapter {
 		// set up a camera, set to background size.
 		camera = new OrthographicCamera();
         camera.setToOrtho(false, screenWidth, screenHeight);        
-        
   
-        
         
       // Setting up the UI and what a nightmare!
         // start with a skin, and a 1x1 px square
@@ -157,6 +162,12 @@ public class Blackjack extends ApplicationAdapter {
 		buttonMap.put("hardMode", new Runnable() {
 			public void run() { difficulty(3);}
 		});
+		buttonMap.put("exit", new Runnable() {
+			public void run() { gameOver(1);}
+		});
+		buttonMap.put("playAgain", new Runnable() {
+			public void run() { gameOver(0);}
+		});
 		
 		
 		// make buttons
@@ -166,11 +177,11 @@ public class Blackjack extends ApplicationAdapter {
 		final TextButton easyMode = getButton("Easy", 20, 20, "easyMode", textButtonStyle);
 		final TextButton mediumMode = getButton("Normal", 130, 20, "mediumMode", textButtonStyle);
 		final TextButton hardMode = getButton("Hard", 240, 20, "hardMode", textButtonStyle);
+		final TextButton exit = getButton("Exit", 976, 20, "exit", textButtonStyle);
+		final TextButton playAgain = getButton("Play Again", 20, 20, "playAgain", textButtonStyle);
 		
 		// the bet/text field
 		betField = new TextField("100",textFieldStyle);
-		//betField.setText("test");
-		//betField.setMessageText("0");
 		betField.setPosition(100, 75);
 		betField.setSize(100, 25);
 		betField.setAlignment(1);
@@ -183,6 +194,8 @@ public class Blackjack extends ApplicationAdapter {
 		titleStage.addActor(easyMode);
 		titleStage.addActor(mediumMode);
 		titleStage.addActor(hardMode);
+		gameOverStage.addActor(exit);
+		gameOverStage.addActor(playAgain);
 		
 		// add the labels to the stage
 		stage.addActor(playerScore);
@@ -214,22 +227,27 @@ public class Blackjack extends ApplicationAdapter {
 		batch.begin();
 		if(titleScreen)
 			batch.draw(titleBackground, 0, 0);
+		else if(gameOverScreen)
+			batch.draw(gameOverBackground, 0, 0);
 		else
 			batch.draw(background, 0, 0);
 		deck.draw(batch);
 		batch.end();
 		
 		if(titleScreen){
-			Gdx.input.setInputProcessor(titleStage); // this NEEDS to be here. so stage can have events
+			Gdx.input.setInputProcessor(titleStage); // this NEEDS to be here so stage can have events
 			titleStage.draw(); 
+		} else if (gameOverScreen){
+			Gdx.input.setInputProcessor(gameOverStage); // this NEEDS to be here so stage can have events
+			gameOverStage.draw(); 
 		} else {
-			Gdx.input.setInputProcessor(stage); // this NEEDS to be here. so stage can have events
+			Gdx.input.setInputProcessor(stage); // this NEEDS to be here so stage can have events
 			stage.draw(); 
 		}
 		
 	}
 	
-	public void difficulty(int diff){
+	private void difficulty(int diff){
 		if(diff == 1)
 			playerBalance = 5000;
 		else if (diff == 2)
@@ -242,37 +260,41 @@ public class Blackjack extends ApplicationAdapter {
 
 	}
 	
-	public void deal(){
-		//System.out.println("dealt! bet = " + betField.getText());
+	private void gameOver(int choice){
+		if (choice == 1){ // if exit is clicked then the application closes
+			System.exit(0);
+		}
+		gameOverScreen = false;	// otherwise the game over screen is removed 
+		titleScreen = true;		// and replaced with the title screen
+	}
+	
+	private void deal(){
 		if (!playing){
 			playing = true;
-			deck.Deal();
+			deck.deal();
 			updateScores();
 			result.setText(" ");
 		}
 	}
 	
-	public void hit(){
-		//System.out.println("hit!");
+	private void hit(){
 		if (playing){
-			deck.Hit(0);
+			deck.hit(0);
 			updateScores();
 		}
 	}
 	
-	public void stand(){
-		//System.out.println("stand!");
+	private void stand(){
 		// dealer will draw to 17. updateScores() also evaluates bust conditions.
 		if (playing){
 			while (dealerTotal <=17){
-				deck.Hit(1);
+				deck.hit(1);
 				updateScores();
 			}
 			
 			
 			// if nobody bust. busted? bustered...
 			// then playing == true. now we evaluate who won based on card values.
-			
 			if (playing){
 				int betAmount = Integer.parseInt(betField.getText());
 				if (dealerTotal > playerTotal){
@@ -288,10 +310,9 @@ public class Blackjack extends ApplicationAdapter {
 			playerCash.setText("Player: "+ playerBalance);
 			playing = false;
 		}
-			
 	}	
 	
-	public void updateScores(){
+	private void updateScores(){
 		playerTotal = 0;
 		dealerTotal = 0;
 		int betAmount = Integer.parseInt(betField.getText());
@@ -305,6 +326,12 @@ public class Blackjack extends ApplicationAdapter {
 				playing = false;
 				playerBalance -= betAmount;
 				playerCash.setText("Player: "+ playerBalance);
+			}
+			if(playerBalance <= 0){
+				gameOverScreen = true;
+				//deck.clearHands();
+				//deck.playerHand.clear();
+				//deck.dealerHand.clear();
 			}
 		}
 		
