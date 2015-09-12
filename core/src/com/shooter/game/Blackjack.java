@@ -88,9 +88,9 @@ public class Blackjack extends ApplicationAdapter {
         // start with a skin, and a 1x1 px square
         skin = new Skin();
 		Pixmap pixmap = new Pixmap(100, 50, Format.RGBA8888); // sets the button default size
-		pixmap.setColor(Color.CYAN); // button default color
-		pixmap.fill();
-		skin.add("buttonskin", new Texture(pixmap)); // make the button skin using the pixmap
+
+		skin.add("buttonDown", new Texture(Gdx.files.internal("btnDown.png")));
+		skin.add("buttonUp", new Texture(Gdx.files.internal("btnUp.png")));
  
 		pixmap.setColor(Color.WHITE);
 		pixmap.fill();
@@ -103,8 +103,8 @@ public class Blackjack extends ApplicationAdapter {
  
 		// make the button style  
 		TextButtonStyle textButtonStyle = new TextButtonStyle();
-		textButtonStyle.up = skin.newDrawable("buttonskin", Color.LIGHT_GRAY); // the way the button will look
-		textButtonStyle.down = skin.newDrawable("buttonskin", Color.WHITE); // when it's clicked
+		textButtonStyle.up = skin.newDrawable("buttonUp"); // the way the button will look
+		textButtonStyle.down = skin.newDrawable("buttonDown"); // when it's clicked
 		textButtonStyle.font = skin.getFont("default");
  
 		
