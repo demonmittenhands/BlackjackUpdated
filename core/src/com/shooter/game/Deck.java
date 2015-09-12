@@ -112,8 +112,10 @@ public class Deck {
 				c.draw(batch);
 			}
 			elapsedTime += Gdx.graphics.getDeltaTime();
-			if(elapsedTime > 7)
+			if(elapsedTime > 7){
 				shuffling = false;
+				resetRotation();
+			}
 		} else {
 			// call the card method in each card that's been dealt
 			for(Card card : dealerHand){
@@ -129,6 +131,12 @@ public class Deck {
 		
 		
 		
+	}
+	
+	public void resetRotation(){
+		for(Card card : cards){
+			card.resetRot();
+		}
 	}
 	
 	public void stand(){

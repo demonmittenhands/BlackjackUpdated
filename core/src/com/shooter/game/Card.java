@@ -98,4 +98,8 @@ public class Card {
 	public String getRank(){
 		return rank.toString();
 	}
+	
+	public void resetRot(){
+		sprite.setRotation(0);
+	}
 }
