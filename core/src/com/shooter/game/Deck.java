@@ -108,6 +108,7 @@ public class Deck {
 			if(!isShuffled){
 				shuffle();
 				isShuffled = true;
+				cardBack.setPosition(500, 300);
 			}
 			// call the card method in each card that's been dealt
 			for(Card card : dealerHand){
