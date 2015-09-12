@@ -4,7 +4,6 @@ package com.shooter.game;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Random;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
@@ -37,7 +36,6 @@ public class Deck {
 				cards.add(card);
 			}
 		}
-		//shuffle();
 	}
 	
 	public void shuffle(){
@@ -121,9 +119,6 @@ public class Deck {
 				card.draw(batch);
 			}
 		}
-		
-		
-		
 	}
 	
 	public void animateShuffle(SpriteBatch batch){
@@ -141,9 +136,9 @@ public class Deck {
 			cardBack.setPosition(Gdx.graphics.getWidth()/2 - cardBack.getWidth()/2, Gdx.graphics.getHeight()/2 - cardBack.getHeight()/2);
 			if(elapsedTime < 5)
 				cardBack.draw(batch);
-			for(Card c : cards){
-				c.scatterCards();
-				c.draw(batch);
+			for(Card card : cards){
+				card.scatterCard();
+				card.draw(batch);
 			}
 			if(elapsedTime > 7){
 				shuffling = false;
@@ -155,17 +150,31 @@ public class Deck {
 			if(elapsedTime >= 5)
 				cardBack.draw(batch);
 		}		
-		
 	}
 	
 	public void cancelShuffle(){
 		shuffling = false;
 		resetRotation();
+		elapsedTime = 0f;
+		for(Card card : cards){
+			card.resetScatterCardValues();
+		}
 	}
 	
 	public void resetRotation(){
 		for(Card card : cards){
 			card.resetRot();
+		}
+	}
+	
+	public void resetShuffling(){
+		shuffling = true;
+		fanCards = true;
+		resetRotation();
+		elapsedTime = 0f;
+		isShuffled = false;
+		for(Card card : cards){
+			card.resetScatterCardValues();
 		}
 	}
 	

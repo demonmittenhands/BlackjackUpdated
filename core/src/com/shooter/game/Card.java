@@ -1,7 +1,7 @@
 package com.shooter.game;
 
 import java.util.Random;
-import java.math.*;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -23,7 +23,6 @@ public class Card {
 	private int directionY = 1;
 	private float boundX = 200;
 	private float boundY = 50;
-	private float elapsedTime = 0f;
 	
 	public Card(int suit, int rank, Sprite s) {
 		this.sprite = s;
@@ -53,7 +52,7 @@ public class Card {
 		return sprite.getY();
 	}
 	
-	public void scatterCards(){
+	public void scatterCard(){
 		float deltatime = Gdx.graphics.getDeltaTime();
 		Random rand = new Random();
 		if(rand.nextInt(100) == 1)
@@ -126,5 +125,13 @@ public class Card {
 	
 	public void resetRot(){
 		sprite.setRotation(0);
+	}
+	
+	public void resetScatterCardValues(){
+		angle = 0f;
+		directionX = 1;
+		directionY = 1;
+		boundX = 200;
+		boundY = 50;
 	}
 }

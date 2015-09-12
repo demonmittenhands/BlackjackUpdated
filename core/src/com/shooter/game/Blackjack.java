@@ -62,7 +62,7 @@ public class Blackjack extends ApplicationAdapter {
 	private boolean gameOverScreen = false; // will be toggled on when player loses
 
 	private String sPlayerScore = "Player: ";
-	private String sPlayerCash = "Player: $";
+	private String sPlayerCash = "Cash: $";
 	private String sDealerScore = "Dealer: ";
 	
 	private HashMap<String, Runnable> buttonMap = new HashMap<String, Runnable>();
@@ -441,6 +441,7 @@ public class Blackjack extends ApplicationAdapter {
 		}
 		gameOverScreen = false; // otherwise the game over screen is removed
 		titleScreen = true; // and replaced with the title screen
+		deck.resetShuffling();
 	}
 
 	private void deal() {
@@ -470,23 +471,23 @@ public class Blackjack extends ApplicationAdapter {
 		// dealer will draw to 16, will stand on all 17's. updateScores() also
 		// evaluates bust conditions.
 		if (playing) {
+			int betAmount = Integer.parseInt(betField.getText());
 			deck.holeCard.setCover(false); // Dealer can now reveal the hole
 											// card
 			while (dealerTotal < 17) {
 				deck.hit(1);
 				updateScores();
 			}
-			updateScores(); // necessary to reveal the dealer's total if the
+			if(playing)
+				updateScores(); // necessary to reveal the dealer's total if the
 							// hole card put his value over 17
 
 			// if nobody bust. busted? bustered...
 			// then playing == true. now we evaluate who won based on card
 			// values.
 			if (playing) {
-				int betAmount = Integer.parseInt(betField.getText());
 				if (dealerTotal > playerTotal) {
 					result.setText("DEALER WINS! -" + betAmount);
-					betField.setText("0");
 				} else if (dealerTotal < playerTotal) {
 					result.setText("YOU WIN! +" + betAmount*2);
 					playerBalance += betAmount*2;
@@ -495,7 +496,13 @@ public class Blackjack extends ApplicationAdapter {
 				}
 			}
 			playerCash.setText(sPlayerCash + playerBalance);
+			betField.setText("0");
 			playing = false;
+			// check to see if the player has any money left to play with
+			if (playerBalance == 0 && Integer.parseInt(betField.getText()) == 0) {
+				gameOverScreen = true;
+				//deck.shuffling = true;
+			}
 		}
 
 	}
@@ -542,17 +549,18 @@ public class Blackjack extends ApplicationAdapter {
 				result.setText("BUST! -" + betAmount);
 				playing = false;
 				deck.holeCard.setCover(false);
-				playerCash.setText(sPlayerScore + playerBalance);
+				playerCash.setText(sPlayerCash + playerBalance);
 				betField.setText("0");
 			}
+			// check to see if the player has any money left to play with
 			if (playerBalance == 0 && Integer.parseInt(betField.getText()) == 0) {
 				gameOverScreen = true;
-				
 			}
 		}
 
 		// display the dealer's hand and win/loss conditions
 		for (Card card : deck.dealerHand) {
+			betAmount = Integer.parseInt(betField.getText());
 			dealerTotal += card.getValue();
 			dealerScore.setText(sDealerScore + dealerTotal);
 
@@ -566,6 +574,7 @@ public class Blackjack extends ApplicationAdapter {
 				playing = false;
 				playerBalance += betAmount*2;
 				playerCash.setText(sPlayerCash + playerBalance);
+				betField.setText("0");
 			}
 
 			// will only display the value of the faced up card (the one in
