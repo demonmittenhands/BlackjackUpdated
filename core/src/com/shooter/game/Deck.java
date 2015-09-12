@@ -158,6 +158,10 @@ public class Deck {
 		
 	}
 	
+	public void cancelShuffle(){
+		shuffling = false;
+		resetRotation();
+	}
 	
 	public void resetRotation(){
 		for(Card card : cards){

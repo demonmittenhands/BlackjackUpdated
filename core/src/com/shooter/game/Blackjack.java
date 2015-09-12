@@ -376,6 +376,7 @@ public class Blackjack extends ApplicationAdapter {
 	}
 	
 	private void deal(){
+		deck.cancelShuffle();
 		if (!playing){
 			playing = true;
 			deck.resetAceValue(); 			//reset the ace values back to 11 for each deal
@@ -387,6 +388,7 @@ public class Blackjack extends ApplicationAdapter {
 	}
 	
 	private void hit(){
+		deck.cancelShuffle();
 		if (playing){
 			deck.hit(0);
 			updateScores();
@@ -394,6 +396,7 @@ public class Blackjack extends ApplicationAdapter {
 	}
 	
 	public void stand(){
+		deck.cancelShuffle();
 		// dealer will draw to 16, will stand on all 17's. updateScores() also evaluates bust conditions.
 		if (playing){
 			deck.holeCard.setCover(false);		//Dealer can now reveal the hole card
