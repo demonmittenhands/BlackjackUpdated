@@ -23,7 +23,9 @@ public class Deck {
 	
 	int cardIndex; // which card we're looking at in the deck. top of the deck!
 	private boolean shuffling = true;
+	private boolean fanCards = true;
 	private float elapsedTime = 0f;
+	private boolean isShuffled = false;
 	
 	public Deck(Texture cardSheet) {
 		TextureRegion[][] tmp = TextureRegion.split(cardSheet, cardSheet.getWidth()/13, cardSheet.getHeight()/4);
@@ -35,7 +37,7 @@ public class Deck {
 				cards.add(card);
 			}
 		}
-		shuffle();
+		//shuffle();
 	}
 	
 	public void shuffle(){
@@ -101,22 +103,12 @@ public class Deck {
 
 	public void draw(SpriteBatch batch) {
 		if(shuffling){
-			for(Card c : cards){
-				Random rand = new Random();
-				if(elapsedTime == 0)
-					c.SetPosition(rand.nextInt(Gdx.graphics.getWidth()), rand.nextInt(Gdx.graphics.getHeight()));
-				else {
-					c.scatterCards();
-				}
-				
-				c.draw(batch);
-			}
-			elapsedTime += Gdx.graphics.getDeltaTime();
-			if(elapsedTime > 7){
-				shuffling = false;
-				resetRotation();
-			}
+			animateShuffle(batch);
 		} else {
+			if(!isShuffled){
+				shuffle();
+				isShuffled = true;
+			}
 			// call the card method in each card that's been dealt
 			for(Card card : dealerHand){
 				card.draw(batch);
@@ -132,6 +124,39 @@ public class Deck {
 		
 		
 	}
+	
+	public void animateShuffle(SpriteBatch batch){
+		if(fanCards){
+			for(int i = 0; i < cards.size(); i++){
+				cards.get(i).fanCard(i, elapsedTime);
+				cards.get(i).draw(batch);
+			}
+			elapsedTime += Gdx.graphics.getDeltaTime();
+			if(elapsedTime > 5){
+				fanCards = false;
+				elapsedTime = 0;
+			}
+		} else {
+			cardBack.setPosition(Gdx.graphics.getWidth()/2 - cardBack.getWidth()/2, Gdx.graphics.getHeight()/2 - cardBack.getHeight()/2);
+			if(elapsedTime < 5)
+				cardBack.draw(batch);
+			for(Card c : cards){
+				c.scatterCards();
+				c.draw(batch);
+			}
+			if(elapsedTime > 7){
+				shuffling = false;
+				resetRotation();
+				elapsedTime = 0;
+			}
+			elapsedTime += Gdx.graphics.getDeltaTime();
+			
+			if(elapsedTime >= 5)
+				cardBack.draw(batch);
+		}		
+		
+	}
+	
 	
 	public void resetRotation(){
 		for(Card card : cards){

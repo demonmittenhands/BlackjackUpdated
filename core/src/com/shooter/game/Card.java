@@ -1,7 +1,7 @@
 package com.shooter.game;
 
 import java.util.Random;
-
+import java.math.*;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -21,8 +21,9 @@ public class Card {
 	private float angle = 0f;
 	private int directionX = 1;
 	private int directionY = 1;
-	private float boundX = 400;
-	private float boundY = 100;
+	private float boundX = 200;
+	private float boundY = 50;
+	private float elapsedTime = 0f;
 	
 	public Card(int suit, int rank, Sprite s) {
 		this.sprite = s;
@@ -70,21 +71,45 @@ public class Card {
 			angle -= deltatime * 100;
 		
 		
-		sprite.setPosition(getX() + 200*deltatime*directionX , getY() + 100*deltatime*directionY);
+		sprite.setPosition(getX() + (200*deltatime*directionX) , getY() + (100*deltatime*directionY));
 		
-		if(sprite.getX() > Gdx.graphics.getWidth() - boundX - (sprite.getWidth()/2))
-			sprite.setX(Gdx.graphics.getWidth() - boundX - (sprite.getWidth()/2));
-		if(sprite.getX() < boundX - (sprite.getWidth()/2))
-			sprite.setX(boundX - (sprite.getWidth()/2));
-		if(sprite.getY() > Gdx.graphics.getHeight() - boundY)
-			sprite.setY(Gdx.graphics.getHeight() - boundY);
+		float centerX = (Gdx.graphics.getWidth()/2) - (sprite.getWidth()/2);
+		float centerY = (Gdx.graphics.getHeight()/2) - (sprite.getHeight()/2);
+		
+		if(sprite.getX() > Gdx.graphics.getWidth() - boundX - sprite.getWidth())
+			sprite.setX(Gdx.graphics.getWidth() - boundX - sprite.getWidth());
+		if(sprite.getX() < boundX)
+			sprite.setX(boundX);
+		if(sprite.getY() > Gdx.graphics.getHeight() - boundY - sprite.getHeight())
+			sprite.setY(Gdx.graphics.getHeight() - boundY - sprite.getHeight());
 		if(sprite.getY() < boundY)
 			sprite.setY(boundY);
 		
-		boundX += deltatime * 60;
-		boundY += deltatime * 20;
+		if(boundX < centerX)
+			boundX += deltatime * ((Gdx.graphics.getWidth()-400)/14);
+		else
+			resetRot();
+		if (boundY < centerY)
+			boundY += deltatime * ((Gdx.graphics.getHeight()-100)/14);
+		else
+			resetRot();
 
 		
+	}
+	
+	public void fanCard(int index, float elapsedTime){
+		float radius = 600f;
+		double movement = elapsedTime * 20f;
+		double angle = -26 + movement;
+		if (angle > index - 26)
+			angle = index - 26;
+		sprite.setRotation((float) angle * -1);
+		angle = angle * Math.PI / 180;
+		float centerX = Gdx.graphics.getWidth()/2;
+		float centerY = (Gdx.graphics.getHeight()/2) + 100;
+		float xPos = (float) (centerX + (radius * Math.sin(angle)));
+		float yPos = (float) (centerY - (radius * (1-Math.cos(angle))));
+		sprite.setPosition(xPos, yPos);
 	}
 	
 	public int getValue(){
