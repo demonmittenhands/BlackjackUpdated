@@ -4,6 +4,7 @@ package com.shooter.game;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
@@ -21,6 +22,8 @@ public class Deck {
 	HoleCard holeCard = new HoleCard(cardBack);
 	
 	int cardIndex; // which card we're looking at in the deck. top of the deck!
+	private boolean shuffling = true;
+	private float elapsedTime = 0f;
 	
 	public Deck(Texture cardSheet) {
 		TextureRegion[][] tmp = TextureRegion.split(cardSheet, cardSheet.getWidth()/13, cardSheet.getHeight()/4);
@@ -97,16 +100,34 @@ public class Deck {
 	}
 
 	public void draw(SpriteBatch batch) {
-		// call the card method in each card that's been dealt
-		for(Card card : dealerHand){
-			card.draw(batch);
+		if(shuffling){
+			for(Card c : cards){
+				Random rand = new Random();
+				if(elapsedTime == 0)
+					c.SetPosition(rand.nextInt(Gdx.graphics.getWidth()), rand.nextInt(Gdx.graphics.getHeight()));
+				else {
+					c.scatterCards();
+				}
+				
+				c.draw(batch);
+			}
+			elapsedTime += Gdx.graphics.getDeltaTime();
+			if(elapsedTime > 7)
+				shuffling = false;
+		} else {
+			// call the card method in each card that's been dealt
+			for(Card card : dealerHand){
+				card.draw(batch);
+			}
+			if (holeCard.isCover() == true){
+				holeCard.draw(batch);
+			}
+			for(Card card : playerHand){
+				card.draw(batch);
+			}
 		}
-		if (holeCard.isCover() == true){
-			holeCard.draw(batch);
-		}
-		for(Card card : playerHand){
-			card.draw(batch);
-		}
+		
+		
 		
 	}
 	
