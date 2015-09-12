@@ -15,6 +15,8 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.ui.ImageButton.ImageButtonStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
@@ -52,6 +54,7 @@ public class Blackjack extends ApplicationAdapter {
 	private Label playerCash;
 	private Label playerBet;
 	private Label result;
+	private Label chip1, chip5, chip25, chip100, chip500;
 	
 	private boolean playing; // trigger to turn on/off buttons based on game state.
 	private boolean titleScreen = true; //toggle to load titlescreen
@@ -94,9 +97,17 @@ public class Blackjack extends ApplicationAdapter {
         // start with a skin, and a 1x1 px square
         skin = new Skin();
 		Pixmap pixmap = new Pixmap(100, 50, Format.RGBA8888); // sets the button default size
-		pixmap.setColor(Color.CYAN); // button default color
-		pixmap.fill();
-		skin.add("buttonskin", new Texture(pixmap)); // make the button skin using the pixmap
+
+		skin.add("buttonDown", new Texture(Gdx.files.internal("btnDown.png")));
+		skin.add("buttonUp", new Texture(Gdx.files.internal("btnUp.png")));
+		skin.add("betLess", new Texture(Gdx.files.internal("btnLess.png")));
+		skin.add("betMore", new Texture(Gdx.files.internal("btnMore.png")));
+		skin.add("chip1", new Texture(Gdx.files.internal("chip1.png")));
+		skin.add("chip5", new Texture(Gdx.files.internal("chip5.png")));
+		skin.add("chip25", new Texture(Gdx.files.internal("chip25.png")));
+		skin.add("chip100", new Texture(Gdx.files.internal("chip100.png")));
+		skin.add("chip500", new Texture(Gdx.files.internal("chip500.png")));
+		
  
 		pixmap.setColor(Color.WHITE);
 		pixmap.fill();
@@ -109,10 +120,17 @@ public class Blackjack extends ApplicationAdapter {
  
 		// make the button style  
 		TextButtonStyle textButtonStyle = new TextButtonStyle();
-		textButtonStyle.up = skin.newDrawable("buttonskin", Color.LIGHT_GRAY); // the way the button will look
-		textButtonStyle.down = skin.newDrawable("buttonskin", Color.WHITE); // when it's clicked
+		textButtonStyle.up = skin.newDrawable("buttonUp"); // the way the button will look
+		textButtonStyle.down = skin.newDrawable("buttonDown"); // when it's clicked
 		textButtonStyle.font = skin.getFont("default");
- 
+		
+		// make the increase/decrease bet button style
+		TextButtonStyle betLessButtonStyle = new TextButtonStyle();
+		betLessButtonStyle.up = skin.newDrawable("betLess");
+		TextButtonStyle betMoreButtonStyle = new TextButtonStyle();
+		betMoreButtonStyle.up = skin.newDrawable("betMore");
+		betLessButtonStyle.font = skin.getFont("default");
+		betMoreButtonStyle.font = skin.getFont("default");
 		
 		// make the textfield style
 		TextFieldStyle textFieldStyle = new TextFieldStyle();
@@ -124,7 +142,8 @@ public class Blackjack extends ApplicationAdapter {
 		// make the label style
 		LabelStyle lableStyle = new LabelStyle();
 		lableStyle.font = new BitmapFont();
-		
+		LabelStyle chipLabelStyle = new LabelStyle();
+		chipLabelStyle.font = new BitmapFont();
 		
 	  // making the UI
 		// the labels (hand totals and cash)
@@ -133,12 +152,38 @@ public class Blackjack extends ApplicationAdapter {
 		dealerScore = new Label("Dealer: ", lableStyle);
 		dealerScore.setPosition(500, 275);
 		playerCash = new Label("Cash: " + playerBalance, lableStyle);
-		playerCash.setPosition(50, 100);
+		playerCash.setPosition(250, 75);
 		playerBet = new Label("Bet: ", lableStyle);
-		playerBet.setPosition(50, 80);
+		playerBet.setPosition(25, 77);
 		result = new Label(" ", lableStyle);
 		result.setPosition(500, 150);
-	
+		
+		// the chip sprites/icons and labels
+		chip1 = new Label("1", lableStyle);
+		chip1.setPosition(83, 135);		
+		chip5 = new Label("5", lableStyle);
+		chip5.setPosition(83, 200);	
+		chip25 = new Label("25", lableStyle);
+		chip25.setPosition(78, 265);		
+		chip100 = new Label("100", lableStyle);
+		chip100.setPosition(74, 330);		
+		chip500 = new Label("500", lableStyle);
+		chip500.setPosition(74, 395);
+			
+		Image chip1Img = new Image(skin.newDrawable("chip1"));
+		chip1Img.setPosition(62,  122);
+		Image chip5Img = new Image(skin.newDrawable("chip5"));
+		chip5Img.setPosition(62,  187);		
+		Image chip25Img = new Image(skin.newDrawable("chip25"));
+		chip25Img.setPosition(62,  252);		
+		Image chip100Img = new Image(skin.newDrawable("chip100"));
+		chip100Img.setPosition(62,  317);		
+		Image chip500Img = new Image(skin.newDrawable("chip500"));
+		chip500Img.setPosition(62,  382);
+		
+		
+		
+		
 		//add Buttons to map
 		buttonMap.put("hitButton", new Runnable() {
 				public void run() { hit();}
@@ -149,6 +194,7 @@ public class Blackjack extends ApplicationAdapter {
 		buttonMap.put("standButton", new Runnable() {
 			public void run() { stand();}
 		});
+
 		buttonMap.put("easyMode", new Runnable() {
 			public void run() { difficulty(1);}
 		});
@@ -165,11 +211,25 @@ public class Blackjack extends ApplicationAdapter {
 			public void run() { gameOver(0);}
 		});
 		
+
+		// the increase/decrease bet buttons
+		buttonMap.put("betLess1", new Runnable(){public void run() {changeBet(-1);}});
+		buttonMap.put("betMore1", new Runnable(){public void run() {changeBet(1);}});
+		buttonMap.put("betLess5", new Runnable(){public void run() {changeBet(-5);}});
+		buttonMap.put("betMore5", new Runnable(){public void run() {changeBet(5);}});
+		buttonMap.put("betLess25", new Runnable(){public void run() {changeBet(-25);}});
+		buttonMap.put("betMore25", new Runnable(){public void run() {changeBet(25);}});
+		buttonMap.put("betLess100", new Runnable(){public void run() {changeBet(-100);}});
+		buttonMap.put("betMore100", new Runnable(){public void run() {changeBet(100);}});
+		buttonMap.put("betLess500", new Runnable(){public void run() {changeBet(-500);}});
+		buttonMap.put("betMore500", new Runnable(){public void run() {changeBet(500);}});
+
 		
 		// make buttons
 		final TextButton standButton = getButton("Stand", 240, 20, "standButton", textButtonStyle);
 		final TextButton hitButton = getButton("Hit", 130, 20, "hitButton", textButtonStyle);
 		final TextButton dealButton = getButton("Deal", 20, 20, "dealButton", textButtonStyle);
+
 		final TextButton easyMode = getButton("Easy", 20, 20, "easyMode", textButtonStyle);
 		final TextButton mediumMode = getButton("Normal", 130, 20, "mediumMode", textButtonStyle);
 		final TextButton hardMode = getButton("Hard", 240, 20, "hardMode", textButtonStyle);
@@ -179,6 +239,26 @@ public class Blackjack extends ApplicationAdapter {
 		// the bet/text field
 		betField = new TextField("100",textFieldStyle);
 		betField.setPosition(100, 75);
+
+		// increase/decrease bet buttons
+		final TextButton betLess1 = getButton(" ", 20, 130, "betLess1", betLessButtonStyle);
+		final TextButton betMore1 = getButton(" ", 120, 130, "betMore1", betMoreButtonStyle);
+		final TextButton betLess5 = getButton(" ", 20, 195, "betLess5", betLessButtonStyle);
+		final TextButton betMore5 = getButton(" ", 120, 195, "betMore5", betMoreButtonStyle);
+		final TextButton betLess25 = getButton(" ", 20, 260, "betLess25", betLessButtonStyle);
+		final TextButton betMore25 = getButton(" ", 120, 260, "betMore25", betMoreButtonStyle);
+		final TextButton betLess100 = getButton(" ", 20, 325, "betLess100", betLessButtonStyle);
+		final TextButton betMore100 = getButton(" ", 120, 325, "betMore100", betMoreButtonStyle);
+		final TextButton betLess500 = getButton(" ", 20, 390, "betLess500", betLessButtonStyle);
+		final TextButton betMore500 = getButton(" ", 120, 390, "betMore500", betMoreButtonStyle);
+		
+		
+		
+		
+		// the bet/text field
+		betField = new TextField("100",textFieldStyle);
+		betField.setPosition(60, 75);
+
 		betField.setSize(100, 25);
 		betField.setAlignment(1);
 
@@ -193,13 +273,41 @@ public class Blackjack extends ApplicationAdapter {
 		gameOverStage.addActor(exit);
 		gameOverStage.addActor(playAgain);
 		
+		stage.addActor(betLess1);
+		stage.addActor(betMore1);
+		stage.addActor(betLess5);
+		stage.addActor(betMore5);
+		stage.addActor(betLess25);
+		stage.addActor(betMore25);
+		stage.addActor(betLess100);
+		stage.addActor(betMore100);
+		stage.addActor(betLess500);
+		stage.addActor(betMore500);
+		
+		
 		// add the labels to the stage
 		stage.addActor(playerScore);
 		stage.addActor(dealerScore);
 		stage.addActor(playerBet);
 		stage.addActor(playerCash);
-		stage.addActor(result);
-        
+		stage.addActor(result);	
+		
+		// add the chip sprites to the stage
+		stage.addActor(chip1Img);
+		stage.addActor(chip5Img);
+		stage.addActor(chip25Img);
+		stage.addActor(chip100Img);
+		stage.addActor(chip500Img);
+		
+		// now add the chip labels
+		stage.addActor(chip1);
+		stage.addActor(chip5);
+		stage.addActor(chip25);
+		stage.addActor(chip100);
+		stage.addActor(chip500);
+		
+		
+
 		
 	}
 
@@ -392,6 +500,23 @@ public class Blackjack extends ApplicationAdapter {
 
 	} // end updateScores()
 	
+
 	
+	// used for the bet increase/decrease buttons
+	public void changeBet(int amount){		
+		if (!playing){
+			int betAmount = Integer.parseInt(betField.getText());
+			if (amount > 0 && (amount + betAmount) <= playerBalance){
+				betAmount += amount;
+				playerBalance = playerBalance - amount;
+			} else if (amount < 0 && betAmount >= Math.abs(amount)){
+				betAmount = betAmount - Math.abs(amount);
+				playerBalance = playerBalance + Math.abs(amount);				
+			}
+			betField.setText(""+betAmount);
+			playerCash.setText("Player: " +playerBalance);
+		}
+	} // end changeBet()
+
 	
 }
