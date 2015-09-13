@@ -477,9 +477,15 @@ public class Blackjack extends ApplicationAdapter {
 	}
 
 	private void difficulty(int diff) {
+		try {
+			createUser();
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			System.out.println("Failed to create user.");
+		}
+		
 		if (diff == 0){
 			try {
-				createUser();
 				getBalance();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
