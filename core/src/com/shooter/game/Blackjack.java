@@ -152,7 +152,7 @@ public class Blackjack extends ApplicationAdapter {
 		playerBet = new Label(sPlayerBet + betAmount, labelStyle);
 		playerBet.setPosition(25, 77);
 		result = new Label(" ", labelStyle);
-		result.setPosition(505, 410);
+		result.setPosition(500, 410);
 
 		// the chip sprites/icons and labels
 		chip1 = new Label("1", labelStyle);
@@ -469,13 +469,13 @@ public class Blackjack extends ApplicationAdapter {
 			if (playing) {
 				updateScores(); // necessary to reveal the dealer's total if the hole card put his value over 17
 				if (dealerTotal > playerTotal) {
-					result.setText("DEALER WINS! -" + betAmount);
+					result.setText("DEALER WINS! - $" + betAmount);
 				} else if (dealerTotal < playerTotal) {
-					result.setText("YOU WIN! +" + betAmount*2);
+					result.setText("YOU WIN! + $" + betAmount*2);
 					playerBalance += betAmount*2;
 				} else if (dealerTotal == playerTotal) {
 					playerBalance += betAmount; // (CALEB) Added to correctly refund a tie
-					result.setText("PUSH! + 0");
+					result.setText("PUSH! + $0");
 				}
 			}
 			playerCash.setText(sPlayerCash + playerBalance);
@@ -497,7 +497,7 @@ public class Blackjack extends ApplicationAdapter {
 		playerTotal = handValue(deck.playerHand);
 		playerScore.setText(sPlayerScore + playerTotal);
 		if (playerTotal > 21) {
-			result.setText("PLAYER BUST! -" + betAmount);
+			result.setText("PLAYER BUST! - $" + betAmount);
 			playing = false;
 			deck.holeCard.setCover(false);
 			playerCash.setText(sPlayerCash + playerBalance);
@@ -514,7 +514,7 @@ public class Blackjack extends ApplicationAdapter {
 		dealerTotal = handValue(deck.dealerHand);
 		dealerScore.setText(sDealerScore + dealerTotal);
 		if (dealerTotal > 21) {
-			result.setText("DEALER BUST! +" + betAmount*2);
+			result.setText("DEALER BUST! + $" + betAmount*2);
 			playing = false;
 			playerBalance += betAmount*2;
 			playerCash.setText(sPlayerCash + playerBalance);
