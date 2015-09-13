@@ -129,6 +129,7 @@ public class Blackjack extends ApplicationAdapter {
 
 		pixmap.setColor(Color.WHITE);
 		pixmap.fill();
+		skin.add("textFieldSkin", new Texture(pixmap));
 
 		// Store the default libgdx font under the name "default".
 		BitmapFont bitmapfont = new BitmapFont();
