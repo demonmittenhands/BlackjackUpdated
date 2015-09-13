@@ -51,6 +51,7 @@ public class Blackjack extends ApplicationAdapter {
 	private int playerTotal;
 	private int dealerTotal;
 	private int playerBalance;
+	private float elapsedTime = 0f;
 
 	private Label playerScore;
 	private Label dealerScore;
@@ -402,6 +403,10 @@ public class Blackjack extends ApplicationAdapter {
 
 	@Override
 	public void render() {
+		if (playerBalance == 0 && Integer.parseInt(betField.getText()) == 0) {
+			testGameOver();
+		}
+		
 		Gdx.gl.glClearColor(1, 0, 0, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
@@ -515,7 +520,7 @@ public class Blackjack extends ApplicationAdapter {
 			playing = false;
 			// check to see if the player has any money left to play with
 			if (playerBalance == 0 && Integer.parseInt(betField.getText()) == 0) {
-				gameOverScreen = true;
+				testGameOver();
 				//deck.shuffling = true;
 			}
 		}
@@ -538,7 +543,8 @@ public class Blackjack extends ApplicationAdapter {
 		}
 		// check to see if the player has any money left to play with
 		if (playerBalance == 0 && Integer.parseInt(betField.getText()) == 0) {
-			gameOverScreen = true;
+			testGameOver();
+
 		}
 
 		// display the dealer's hand and win/loss conditions
@@ -605,5 +611,14 @@ public class Blackjack extends ApplicationAdapter {
 			playerCash.setText(sPlayerCash + playerBalance);
 		}
 	} // end bet()
+	
+	private void testGameOver(){
+		if(elapsedTime > 3f){
+			gameOverScreen = true;
+			deck = new Deck(cardSpriteSheet);	
+			elapsedTime = 0;
+		} else
+			elapsedTime += Gdx.graphics.getDeltaTime();
+	}
 	
 }
