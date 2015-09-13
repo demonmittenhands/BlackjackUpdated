@@ -13,6 +13,7 @@ public class DesktopLauncher {
 		config.title = "JUST BlackJack '98";
 		config.height = 451;
         config.width = 1096;
+        config.resizable = false;
 		new LwjglApplication(new Blackjack(), config);
 	}
 }
