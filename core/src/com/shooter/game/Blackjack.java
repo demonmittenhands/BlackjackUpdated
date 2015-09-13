@@ -370,19 +370,6 @@ public class Blackjack extends ApplicationAdapter {
 
 	}
 
-	private TextButton getButton(String buttonText, int xPosition,
-			int yPosition, final String id, TextButtonStyle textButtonStyle) {
-		TextButton button = new TextButton(buttonText, textButtonStyle);
-		button.setPosition(xPosition, yPosition);
-
-		button.addListener(new ClickListener() {
-			public void clicked(InputEvent event, float x, float y) {
-				buttonMap.get(id).run();
-			}
-		});
-		return button;
-	}
-
 	@Override
 	public void render() {
 		if (playerBalance == 0 && betAmount == 0) {
@@ -419,6 +406,19 @@ public class Blackjack extends ApplicationAdapter {
 			stage.draw();
 		}
 
+	}
+	
+	private TextButton getButton(String buttonText, int xPosition,
+			int yPosition, final String id, TextButtonStyle textButtonStyle) {
+		TextButton button = new TextButton(buttonText, textButtonStyle);
+		button.setPosition(xPosition, yPosition);
+
+		button.addListener(new ClickListener() {
+			public void clicked(InputEvent event, float x, float y) {
+				buttonMap.get(id).run();
+			}
+		});
+		return button;
 	}
 
 	private void difficulty(int diff) {
@@ -462,7 +462,7 @@ public class Blackjack extends ApplicationAdapter {
 		}
 	}
 
-	public void stand() {
+	private void stand() {
 		deck.cancelShuffle();
 		// dealer will draw to 16, will stand on all 17's. updateScores() also
 		// evaluates bust conditions.
@@ -543,7 +543,7 @@ public class Blackjack extends ApplicationAdapter {
 	} // end updateScores()
 	
 	// (CALEB) Used to evaluate the total value of the hand, handles aces with no further code
-	public static int handValue(List<Card> hand){
+	private static int handValue(List<Card> hand){
 	      int total = 0;
 	      int numOfAces = 0;
 	      for(Card c: hand){
@@ -562,7 +562,7 @@ public class Blackjack extends ApplicationAdapter {
 	   }
 	
 	// used for the bet increase/decrease buttons
-	public void changeBet(int amount) {
+	private void changeBet(int amount) {
 		if (!playing) {
 			if (amount > 0 && (playerBalance - amount) >= 0) {
 				betAmount += amount; // Positive
