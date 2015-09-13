@@ -332,6 +332,8 @@ public class Blackjack extends ApplicationAdapter {
 		betField.setTextFieldListener(new TextFieldListener() {
 
 			  public void keyTyped(TextField textField, char c)  {
+				  if(betField.getText().isEmpty())
+					  betField.setText("0");
 				  if(Integer.parseInt(betField.getText()) > playerBalance)
 					  betField.setText(""+ playerBalance);
 			}
