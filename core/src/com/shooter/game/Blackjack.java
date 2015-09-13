@@ -21,7 +21,6 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
-import com.badlogic.gdx.scenes.scene2d.ui.TextField.TextFieldStyle;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 
 public class Blackjack extends ApplicationAdapter {
@@ -39,7 +38,6 @@ public class Blackjack extends ApplicationAdapter {
 	private Stage titleStage;
 	private Stage gameOverStage;
 	private Skin skin;
-	//private TextField betField;
 
 	private Deck deck;
 
@@ -116,7 +114,6 @@ public class Blackjack extends ApplicationAdapter {
 
 		pixmap.setColor(Color.WHITE);
 		pixmap.fill();
-		skin.add("textFieldSkin", new Texture(pixmap));
 
 		// Store the default libgdx font under the name "default".
 		BitmapFont bitmapfont = new BitmapFont();
@@ -138,42 +135,35 @@ public class Blackjack extends ApplicationAdapter {
 		betLessButtonStyle.font = skin.getFont("default");
 		betMoreButtonStyle.font = skin.getFont("default");
 
-		// make the textfield style
-		TextFieldStyle textFieldStyle = new TextFieldStyle();
-		textFieldStyle.background = skin.newDrawable("textFieldSkin",
-				Color.WHITE);
-		textFieldStyle.fontColor = Color.BLACK;
-		textFieldStyle.font = new BitmapFont();
-
 		// make the label style
-		LabelStyle lableStyle = new LabelStyle();
-		lableStyle.font = new BitmapFont();
+		LabelStyle labelStyle = new LabelStyle();
+		labelStyle.font = new BitmapFont();
 		LabelStyle chipLabelStyle = new LabelStyle();
 		chipLabelStyle.font = new BitmapFont();
 
 		// making the UI
 		// the labels (hand totals and cash)
-		playerScore = new Label(sPlayerScore, lableStyle);
-		playerScore.setPosition(500, 25);
-		dealerScore = new Label(sDealerScore, lableStyle);
-		dealerScore.setPosition(500, 275);
-		playerCash = new Label(sPlayerCash + playerBalance, lableStyle);
+		playerScore = new Label(sPlayerScore, labelStyle);
+		playerScore.setPosition(515, 25);
+		dealerScore = new Label(sDealerScore, labelStyle);
+		dealerScore.setPosition(515, 275);
+		playerCash = new Label(sPlayerCash + playerBalance, labelStyle);
 		playerCash.setPosition(250, 75);
-		playerBet = new Label(sPlayerBet + betAmount, lableStyle);
+		playerBet = new Label(sPlayerBet + betAmount, labelStyle);
 		playerBet.setPosition(25, 77);
-		result = new Label(" ", lableStyle);
-		result.setPosition(500, 150);
+		result = new Label(" ", labelStyle);
+		result.setPosition(505, 410);
 
 		// the chip sprites/icons and labels
-		chip1 = new Label("1", lableStyle);
+		chip1 = new Label("1", labelStyle);
 		chip1.setPosition(83, 135);
-		chip5 = new Label("5", lableStyle);
+		chip5 = new Label("5", labelStyle);
 		chip5.setPosition(83, 200);
-		chip25 = new Label("25", lableStyle);
+		chip25 = new Label("25", labelStyle);
 		chip25.setPosition(78, 265);
-		chip100 = new Label("100", lableStyle);
+		chip100 = new Label("100", labelStyle);
 		chip100.setPosition(74, 330);
-		chip500 = new Label("500", lableStyle);
+		chip500 = new Label("500", labelStyle);
 		chip500.setPosition(74, 395);
 
 		Image chip1Img = new Image(skin.newDrawable("chip1"));
@@ -507,7 +497,7 @@ public class Blackjack extends ApplicationAdapter {
 		playerTotal = handValue(deck.playerHand);
 		playerScore.setText(sPlayerScore + playerTotal);
 		if (playerTotal > 21) {
-			result.setText("BUST! -" + betAmount);
+			result.setText("PLAYER BUST! -" + betAmount);
 			playing = false;
 			deck.holeCard.setCover(false);
 			playerCash.setText(sPlayerCash + playerBalance);
