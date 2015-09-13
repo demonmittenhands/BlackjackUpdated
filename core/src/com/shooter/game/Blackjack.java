@@ -1,5 +1,11 @@
 package com.shooter.game;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.HashMap;
 import java.util.List;
 
@@ -21,9 +27,12 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
+import com.badlogic.gdx.scenes.scene2d.ui.TextField;
+import com.badlogic.gdx.scenes.scene2d.ui.TextField.TextFieldListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 
 public class Blackjack extends ApplicationAdapter {
+	private String username = "Guest";
 	private OrthographicCamera camera; // make a camera
 	private SpriteBatch batch;
 	private Texture background;
@@ -39,12 +48,14 @@ public class Blackjack extends ApplicationAdapter {
 	private Stage gameOverStage;
 	private Skin skin;
 
+
 	private Deck deck;
 
 	private int playerTotal;
 	private int dealerTotal;
 	private int playerBalance = 1;
 	private int betAmount = 0;
+	
 	private float elapsedTime = 0f;
 
 	private Label playerScore;
@@ -53,6 +64,9 @@ public class Blackjack extends ApplicationAdapter {
 	private Label playerBet;
 	private Label result;
 	private Label chip1, chip5, chip25, chip100, chip500;
+	private Label userText;
+	
+	private TextField userField;
 
 	private boolean playing; // trigger to turn on/off buttons based on game
 								// state.
@@ -69,7 +83,7 @@ public class Blackjack extends ApplicationAdapter {
 
 	@Override
 	public void create() {
-
+		
 		// setting up the game and the cards
 		playing = false;
 		playerTotal = 0;
@@ -154,6 +168,9 @@ public class Blackjack extends ApplicationAdapter {
 		result = new Label(" ", labelStyle);
 		result.setPosition(500, 410);
 
+		userText = new Label("Username", labelStyle);
+		userText.setPosition(520, 130);
+
 		// the chip sprites/icons and labels
 		chip1 = new Label("1", labelStyle);
 		chip1.setPosition(83, 135);
@@ -194,12 +211,19 @@ public class Blackjack extends ApplicationAdapter {
 				stand();
 			}
 		});
+		
+		buttonMap.put("contMode", new Runnable() {
+			public void run() {
+				difficulty(0);
+			}
+		});
 
 		buttonMap.put("easyMode", new Runnable() {
 			public void run() {
 				difficulty(1);
 			}
 		});
+		
 		buttonMap.put("mediumMode", new Runnable() {
 			public void run() {
 				difficulty(2);
@@ -281,6 +305,8 @@ public class Blackjack extends ApplicationAdapter {
 		final TextButton dealButton = getButton("Deal", 20, 20, "dealButton",
 				textButtonStyle);
 
+		final TextButton contMode = getButton("Continue", 500, 20, "contMode",
+				textButtonStyle);
 		final TextButton easyMode = getButton("Easy", 20, 20, "easyMode",
 				textButtonStyle);
 		final TextButton mediumMode = getButton("Normal", 130, 20,
@@ -315,14 +341,30 @@ public class Blackjack extends ApplicationAdapter {
 		final TextButton betMore500 = getButton(" ", 120, 390, "betMore500",
 				betMoreButtonStyle);
 
+		
+		Skin textFieldStyle = null;
+		// the Username entry box
+		userField = new TextField(username, textFieldStyle);
+		userField.setTextFieldListener(new TextFieldListener() {
+
+			  public void keyTyped(TextField textField, char c)  {
+				  username = userField.getText();
+			}
+
+			});
+		userField.setPosition(500, 100);
+		userField.setSize(100, 25);
+		userField.setAlignment(1);
+
 		// add the buttons to the stage
 		stage.addActor(dealButton);
 		stage.addActor(hitButton);
 		stage.addActor(standButton);
-		//stage.addActor(betField);
+		titleStage.addActor(contMode);
 		titleStage.addActor(easyMode);
 		titleStage.addActor(mediumMode);
 		titleStage.addActor(hardMode);
+		titleStage.addActor(userField);
 		gameOverStage.addActor(exit);
 		gameOverStage.addActor(playAgain);
 
@@ -343,6 +385,7 @@ public class Blackjack extends ApplicationAdapter {
 		stage.addActor(playerBet);
 		stage.addActor(playerCash);
 		stage.addActor(result);
+		titleStage.addActor(userText);
 
 		// add the chip sprites to the stage
 		stage.addActor(chip1Img);
@@ -412,13 +455,35 @@ public class Blackjack extends ApplicationAdapter {
 	}
 
 	private void difficulty(int diff) {
-		if (diff == 1)
+		try {
+			createUser();
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			System.out.println("Failed to create user.");
+		}
+		
+		if (diff == 0){
+			try {
+				getBalance();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				System.out.println("Failed to receive balance.");
+			}
+		}
+		else if (diff == 1)
 			playerBalance = 5000;
 		else if (diff == 2)
 			playerBalance = 2500;
 		else
 			playerBalance = 500;
 
+		try {
+			saveBalance();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			System.out.println("Failed to save balance");
+		}
+		
 		playerCash.setText(sPlayerCash + playerBalance);
 		titleScreen = false;
 
@@ -529,6 +594,13 @@ public class Blackjack extends ApplicationAdapter {
 			dealerScore.setText(sDealerScore
 					+ deck.dealerHand.get(0).getValue());
 		}
+		
+		try {
+			saveBalance();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			System.out.println("Failed to save balance");
+		}
 
 	} // end updateScores()
 	
@@ -582,6 +654,34 @@ public class Blackjack extends ApplicationAdapter {
 			result.setText("");
 		} else
 			elapsedTime += Gdx.graphics.getDeltaTime();
+	}
+	
+	private void createUser() throws IOException{
+		URL u = new URL("http://icarus.cs.weber.edu/~ll02508/forms/" + 
+				"blackjackBalance.php?option=create&username=" + username);
+		URLConnection c = u.openConnection();
+		InputStream r = c.getInputStream();
+	}
+	
+	private void getBalance() throws IOException{
+		URL u = new URL("http://icarus.cs.weber.edu/~ll02508/forms/" + 
+				"blackjackBalance.php?option=getBalance&username=" + username);
+		URLConnection c = u.openConnection();
+		InputStream r = c.getInputStream();
+		BufferedReader reader = new BufferedReader(new InputStreamReader(r));
+		String read = "";
+		for(String line; ( line = reader.readLine() ) != null;)
+			read += line;
+		playerBalance = Integer.parseInt(read);
+	}
+	
+	private void saveBalance() throws IOException {
+		URL u = new URL("http://icarus.cs.weber.edu/~ll02508/forms/blackjack" + 
+				"Balance.php?option=updateBalance&username="
+				+ username + "&balance=" + playerBalance);
+		URLConnection c = u.openConnection();
+		InputStream r = c.getInputStream();
+
 	}
 	
 }
