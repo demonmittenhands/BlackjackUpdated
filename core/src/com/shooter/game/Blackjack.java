@@ -23,7 +23,10 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
+import com.badlogic.gdx.scenes.scene2d.ui.TextField.TextFieldListener;
+import com.badlogic.gdx.scenes.scene2d.ui.TextField.TextFieldFilter;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField.TextFieldStyle;
+import com.badlogic.gdx.scenes.scene2d.ui.TextField.TextFieldFilter.DigitsOnlyFilter;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 
 public class Blackjack extends ApplicationAdapter {
@@ -325,6 +328,15 @@ public class Blackjack extends ApplicationAdapter {
 
 		// the bet/text field
 		betField = new TextField("0", textFieldStyle);
+		betField.setTextFieldFilter(new DigitsOnlyFilter()); // (CALEB) Added to restrict input and prevent crashes
+		betField.setTextFieldListener(new TextFieldListener() {
+
+			  public void keyTyped(TextField textField, char c)  {
+				  if(Integer.parseInt(betField.getText()) > playerBalance)
+					  betField.setText(""+ playerBalance);
+			}
+
+			});
 		betField.setPosition(60, 75);
 
 		betField.setSize(100, 25);
@@ -447,6 +459,9 @@ public class Blackjack extends ApplicationAdapter {
 	private void deal() {
 		deck.cancelShuffle();
 		if (!playing) {
+			int betAmount = Integer.parseInt(betField.getText());
+			if(betAmount > 0)
+				bet(betAmount);// (CALEB) Added to enable bug free use of typed bet
 			playing = true;
 			deck.resetAceValue(); // reset the ace values back to 11 for each
 									// deal
@@ -492,6 +507,7 @@ public class Blackjack extends ApplicationAdapter {
 					result.setText("YOU WIN! +" + betAmount*2);
 					playerBalance += betAmount*2;
 				} else if (dealerTotal == playerTotal) {
+					playerBalance += betAmount; // (CALEB) Added to correctly refund a tie
 					result.setText("PUSH! + 0");
 				}
 			}
@@ -593,14 +609,22 @@ public class Blackjack extends ApplicationAdapter {
 			int betAmount = Integer.parseInt(betField.getText());
 			if (amount > 0 && (playerBalance - amount) >= 0) {
 				betAmount += amount;
-				playerBalance = playerBalance - amount;
+				//playerBalance = playerBalance - amount;
 			} else if (amount < 0 && betAmount >= Math.abs(amount)) {
-				betAmount = betAmount - Math.abs(amount);
-				playerBalance = playerBalance + Math.abs(amount);
+				betAmount += amount;
+				//betAmount = betAmount - Math.abs(amount);
+				//playerBalance = playerBalance + Math.abs(amount);
 			}
-			betField.setText(""+betAmount);
-			playerCash.setText(sPlayerCash + playerBalance);
+			bet(betAmount);
 		}
 	} // end changeBet()
+	
+	public void bet(int betAmount){
+		if(betAmount <= playerBalance){
+			betField.setText(""+betAmount);
+			playerBalance -= betAmount;
+			playerCash.setText(sPlayerCash + playerBalance);
+		}
+	} // end bet()
 	
 }
