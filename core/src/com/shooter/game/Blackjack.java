@@ -16,17 +16,11 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
-import com.badlogic.gdx.scenes.scene2d.ui.ImageButton.ImageButtonStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
-import com.badlogic.gdx.scenes.scene2d.ui.TextField;
-import com.badlogic.gdx.scenes.scene2d.ui.TextField.TextFieldListener;
-import com.badlogic.gdx.scenes.scene2d.ui.TextField.TextFieldFilter;
-import com.badlogic.gdx.scenes.scene2d.ui.TextField.TextFieldStyle;
-import com.badlogic.gdx.scenes.scene2d.ui.TextField.TextFieldFilter.DigitsOnlyFilter;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 
 public class Blackjack extends ApplicationAdapter {
@@ -44,13 +38,13 @@ public class Blackjack extends ApplicationAdapter {
 	private Stage titleStage;
 	private Stage gameOverStage;
 	private Skin skin;
-	private TextField betField;
 
 	private Deck deck;
 
 	private int playerTotal;
 	private int dealerTotal;
-	private int playerBalance;
+	private int playerBalance = 1;
+	private int betAmount = 0;
 	private float elapsedTime = 0f;
 
 	private Label playerScore;
@@ -68,6 +62,8 @@ public class Blackjack extends ApplicationAdapter {
 	private String sPlayerScore = "Player: ";
 	private String sPlayerCash = "Cash: $";
 	private String sDealerScore = "Dealer: ";
+	private String sPlayerBet = "Bet: $";
+	
 	
 	private HashMap<String, Runnable> buttonMap = new HashMap<String, Runnable>();
 
@@ -118,7 +114,6 @@ public class Blackjack extends ApplicationAdapter {
 
 		pixmap.setColor(Color.WHITE);
 		pixmap.fill();
-		skin.add("textFieldSkin", new Texture(pixmap));
 
 		// Store the default libgdx font under the name "default".
 		BitmapFont bitmapfont = new BitmapFont();
@@ -140,42 +135,35 @@ public class Blackjack extends ApplicationAdapter {
 		betLessButtonStyle.font = skin.getFont("default");
 		betMoreButtonStyle.font = skin.getFont("default");
 
-		// make the textfield style
-		TextFieldStyle textFieldStyle = new TextFieldStyle();
-		textFieldStyle.background = skin.newDrawable("textFieldSkin",
-				Color.WHITE);
-		textFieldStyle.fontColor = Color.BLACK;
-		textFieldStyle.font = new BitmapFont();
-
 		// make the label style
-		LabelStyle lableStyle = new LabelStyle();
-		lableStyle.font = new BitmapFont();
+		LabelStyle labelStyle = new LabelStyle();
+		labelStyle.font = new BitmapFont();
 		LabelStyle chipLabelStyle = new LabelStyle();
 		chipLabelStyle.font = new BitmapFont();
 
 		// making the UI
 		// the labels (hand totals and cash)
-		playerScore = new Label(sPlayerScore, lableStyle);
-		playerScore.setPosition(500, 25);
-		dealerScore = new Label(sDealerScore, lableStyle);
-		dealerScore.setPosition(500, 275);
-		playerCash = new Label(sPlayerCash + playerBalance, lableStyle);
+		playerScore = new Label(sPlayerScore, labelStyle);
+		playerScore.setPosition(515, 25);
+		dealerScore = new Label(sDealerScore, labelStyle);
+		dealerScore.setPosition(515, 275);
+		playerCash = new Label(sPlayerCash + playerBalance, labelStyle);
 		playerCash.setPosition(250, 75);
-		playerBet = new Label("Bet: ", lableStyle);
+		playerBet = new Label(sPlayerBet + betAmount, labelStyle);
 		playerBet.setPosition(25, 77);
-		result = new Label(" ", lableStyle);
-		result.setPosition(500, 150);
+		result = new Label(" ", labelStyle);
+		result.setPosition(500, 410);
 
 		// the chip sprites/icons and labels
-		chip1 = new Label("1", lableStyle);
+		chip1 = new Label("1", labelStyle);
 		chip1.setPosition(83, 135);
-		chip5 = new Label("5", lableStyle);
+		chip5 = new Label("5", labelStyle);
 		chip5.setPosition(83, 200);
-		chip25 = new Label("25", lableStyle);
+		chip25 = new Label("25", labelStyle);
 		chip25.setPosition(78, 265);
-		chip100 = new Label("100", lableStyle);
+		chip100 = new Label("100", labelStyle);
 		chip100.setPosition(74, 330);
-		chip500 = new Label("500", lableStyle);
+		chip500 = new Label("500", labelStyle);
 		chip500.setPosition(74, 395);
 
 		Image chip1Img = new Image(skin.newDrawable("chip1"));
@@ -197,7 +185,7 @@ public class Blackjack extends ApplicationAdapter {
 		});
 		buttonMap.put("dealButton", new Runnable() {
 			public void run() {
-				if(Integer.parseInt(betField.getText()) > 0)
+				if(betAmount > 0)
 				deal();
 			}
 		});
@@ -327,27 +315,11 @@ public class Blackjack extends ApplicationAdapter {
 		final TextButton betMore500 = getButton(" ", 120, 390, "betMore500",
 				betMoreButtonStyle);
 
-		// the bet/text field
-		betField = new TextField("0", textFieldStyle);
-		betField.setTextFieldFilter(new DigitsOnlyFilter()); // (CALEB) Added to restrict input and prevent crashes
-		betField.setTextFieldListener(new TextFieldListener() {
-
-			  public void keyTyped(TextField textField, char c)  {
-				  if(Integer.parseInt(betField.getText()) > playerBalance)
-					  betField.setText(""+ playerBalance);
-			}
-
-			});
-		betField.setPosition(60, 75);
-
-		betField.setSize(100, 25);
-		betField.setAlignment(1);
-
 		// add the buttons to the stage
 		stage.addActor(dealButton);
 		stage.addActor(hitButton);
 		stage.addActor(standButton);
-		stage.addActor(betField);
+		//stage.addActor(betField);
 		titleStage.addActor(easyMode);
 		titleStage.addActor(mediumMode);
 		titleStage.addActor(hardMode);
@@ -388,22 +360,9 @@ public class Blackjack extends ApplicationAdapter {
 
 	}
 
-	private TextButton getButton(String buttonText, int xPosition,
-			int yPosition, final String id, TextButtonStyle textButtonStyle) {
-		TextButton button = new TextButton(buttonText, textButtonStyle);
-		button.setPosition(xPosition, yPosition);
-
-		button.addListener(new ClickListener() {
-			public void clicked(InputEvent event, float x, float y) {
-				buttonMap.get(id).run();
-			}
-		});
-		return button;
-	}
-
 	@Override
 	public void render() {
-		if (playerBalance == 0 && Integer.parseInt(betField.getText()) == 0) {
+		if (playerBalance == 0 && betAmount == 0) {
 			testGameOver();
 		}
 		
@@ -438,6 +397,19 @@ public class Blackjack extends ApplicationAdapter {
 		}
 
 	}
+	
+	private TextButton getButton(String buttonText, int xPosition,
+			int yPosition, final String id, TextButtonStyle textButtonStyle) {
+		TextButton button = new TextButton(buttonText, textButtonStyle);
+		button.setPosition(xPosition, yPosition);
+
+		button.addListener(new ClickListener() {
+			public void clicked(InputEvent event, float x, float y) {
+				buttonMap.get(id).run();
+			}
+		});
+		return button;
+	}
 
 	private void difficulty(int diff) {
 		if (diff == 1)
@@ -464,15 +436,8 @@ public class Blackjack extends ApplicationAdapter {
 	private void deal() {
 		deck.cancelShuffle();
 		if (!playing) {
-			int betAmount = Integer.parseInt(betField.getText());
-			if(betAmount > 0)
-				bet(betAmount);// (CALEB) Added to enable bug free use of typed bet
 			playing = true;
-			// (CALEB) Commented out due to update in tabulating aces 
-			//deck.resetAceValue(); // reset the ace values back to 11 for each
-									// deal
-			deck.holeCard.setCover(true); // the hole card will cover up the
-											// dealer's second card
+			deck.holeCard.setCover(true); // the hole card will cover up the dealer's second card
 			deck.deal();
 			updateScores();
 			result.setText(" ");
@@ -487,12 +452,11 @@ public class Blackjack extends ApplicationAdapter {
 		}
 	}
 
-	public void stand() {
+	private void stand() {
 		deck.cancelShuffle();
 		// dealer will draw to 16, will stand on all 17's. updateScores() also
 		// evaluates bust conditions.
 		if (playing) {
-			int betAmount = Integer.parseInt(betField.getText());
 			deck.holeCard.setCover(false); // Dealer can now reveal the hole
 											// card
 			while (dealerTotal < 17) {
@@ -501,27 +465,26 @@ public class Blackjack extends ApplicationAdapter {
 			}
 
 			// if nobody bust. busted? bustered...
-			// then playing == true. now we evaluate who won based on card
-			// values.
+			// then playing == true. now we evaluate who won based on card values.
 			if (playing) {
 				updateScores(); // necessary to reveal the dealer's total if the hole card put his value over 17
 				if (dealerTotal > playerTotal) {
-					result.setText("DEALER WINS! -" + betAmount);
+					result.setText("DEALER WINS! - $" + betAmount);
 				} else if (dealerTotal < playerTotal) {
-					result.setText("YOU WIN! +" + betAmount*2);
+					result.setText("YOU WIN! + $" + betAmount*2);
 					playerBalance += betAmount*2;
 				} else if (dealerTotal == playerTotal) {
 					playerBalance += betAmount; // (CALEB) Added to correctly refund a tie
-					result.setText("PUSH! + 0");
+					result.setText("PUSH! + $0");
 				}
 			}
 			playerCash.setText(sPlayerCash + playerBalance);
-			betField.setText("0");
+			betAmount = 0;
+			playerBet.setText(sPlayerBet + betAmount);
 			playing = false;
 			// check to see if the player has any money left to play with
-			if (playerBalance == 0 && Integer.parseInt(betField.getText()) == 0) {
+			if (playerBalance == 0 && betAmount == 0) {
 				testGameOver();
-				//deck.shuffling = true;
 			}
 		}
 
@@ -530,33 +493,34 @@ public class Blackjack extends ApplicationAdapter {
 	private void updateScores() {
 		playerTotal = 0;
 		dealerTotal = 0;
-		int betAmount = Integer.parseInt(betField.getText());
 		// display the player's hand and evaluate win/loss conditions
 		playerTotal = handValue(deck.playerHand);
 		playerScore.setText(sPlayerScore + playerTotal);
 		if (playerTotal > 21) {
-			result.setText("BUST! -" + betAmount);
+			result.setText("PLAYER BUST! - $" + betAmount);
 			playing = false;
 			deck.holeCard.setCover(false);
 			playerCash.setText(sPlayerCash + playerBalance);
-			betField.setText("0");
+			betAmount = 0;
+			playerBet.setText(sPlayerBet + betAmount);
 		}
 		// check to see if the player has any money left to play with
-		if (playerBalance == 0 && Integer.parseInt(betField.getText()) == 0) {
+		if (playerBalance == 0 && betAmount == 0) {
 			testGameOver();
 
 		}
 
 		// display the dealer's hand and win/loss conditions
-		betAmount = Integer.parseInt(betField.getText());
 		dealerTotal = handValue(deck.dealerHand);
 		dealerScore.setText(sDealerScore + dealerTotal);
 		if (dealerTotal > 21) {
-			result.setText("DEALER BUST! +" + betAmount*2);
+			result.setText("DEALER BUST! + $" + betAmount*2);
 			playing = false;
 			playerBalance += betAmount*2;
 			playerCash.setText(sPlayerCash + playerBalance);
-			betField.setText("0");
+			//betField.setText("0");
+			betAmount = 0;
+			playerBet.setText(sPlayerBet + betAmount);
 		}
 
 		// will only display the value of the faced up card (the one in
@@ -569,7 +533,7 @@ public class Blackjack extends ApplicationAdapter {
 	} // end updateScores()
 	
 	// (CALEB) Used to evaluate the total value of the hand, handles aces with no further code
-	public static int handValue(List<Card> hand){
+	private static int handValue(List<Card> hand){
 	      int total = 0;
 	      int numOfAces = 0;
 	      for(Card c: hand){
@@ -588,29 +552,21 @@ public class Blackjack extends ApplicationAdapter {
 	   }
 	
 	// used for the bet increase/decrease buttons
-	public void changeBet(int amount) {
+	private void changeBet(int amount) {
 		if (!playing) {
-			int betAmount = Integer.parseInt(betField.getText());
 			if (amount > 0 && (playerBalance - amount) >= 0) {
 				betAmount += amount; // Positive
+				playerBalance -= amount;
 			} else if (amount < 0 && betAmount >= Math.abs(amount)) {
 				betAmount += amount; // Negative
+				playerBalance -= amount;
 			}
 			
-			if(betAmount > playerBalance)
-			  betField.setText(""+ playerBalance);
-			else
-				betField.setText(""+betAmount);
+			playerBet.setText(sPlayerBet + betAmount);
+			playerCash.setText(sPlayerCash + playerBalance);
 		}
 	} // end changeBet()
 	
-	public void bet(int betAmount){
-		if(betAmount <= playerBalance){
-			betField.setText(""+betAmount);
-			playerBalance -= betAmount;
-			playerCash.setText(sPlayerCash + playerBalance);
-		}
-	} // end bet()
 	
 	private void testGameOver(){
 		if(elapsedTime > 3f){
@@ -618,6 +574,12 @@ public class Blackjack extends ApplicationAdapter {
 			deck = new Deck(cardSpriteSheet);	
 			elapsedTime = 0;
 			playerBalance = 1;
+			betAmount = 0;
+			playerBet.setText(sPlayerBet + betAmount);
+			playerCash.setText(sPlayerCash + playerBalance);
+			playerScore.setText(sPlayerScore);
+			dealerScore.setText(sDealerScore);
+			result.setText("");
 		} else
 			elapsedTime += Gdx.graphics.getDeltaTime();
 	}
