@@ -463,7 +463,8 @@ public class Blackjack extends ApplicationAdapter {
 			if(betAmount > 0)
 				bet(betAmount);// (CALEB) Added to enable bug free use of typed bet
 			playing = true;
-			deck.resetAceValue(); // reset the ace values back to 11 for each
+			// (CALEB) Commented out due to update in tabulating aces 
+			//deck.resetAceValue(); // reset the ace values back to 11 for each
 									// deal
 			deck.holeCard.setCover(true); // the hole card will cover up the
 											// dealer's second card
@@ -493,14 +494,12 @@ public class Blackjack extends ApplicationAdapter {
 				deck.hit(1);
 				updateScores();
 			}
-			if(playing)
-				updateScores(); // necessary to reveal the dealer's total if the
-							// hole card put his value over 17
 
 			// if nobody bust. busted? bustered...
 			// then playing == true. now we evaluate who won based on card
 			// values.
 			if (playing) {
+				updateScores(); // necessary to reveal the dealer's total if the hole card put his value over 17
 				if (dealerTotal > playerTotal) {
 					result.setText("DEALER WINS! -" + betAmount);
 				} else if (dealerTotal < playerTotal) {
@@ -523,99 +522,79 @@ public class Blackjack extends ApplicationAdapter {
 
 	}
 
-	// does the hand contain an ace? T or F
-	public boolean hasAce(List<Card> hand) {
-		for (Card temp : hand) {
-			if (temp.getRank() == "ACE" && temp.getValue() == 11) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	// goes through the deck and will change the value of a single ace
-	// (currently valued at 11) to 1.
-	public void changeAceValue(List<Card> hand) {
-		for (Card temp : hand) {
-			if (temp.getRank() == "ACE" && temp.getValue() == 11) {
-				temp.setValue(1);
-				break;
-			}
-		}
-	}
-
 	private void updateScores() {
 		playerTotal = 0;
 		dealerTotal = 0;
 		int betAmount = Integer.parseInt(betField.getText());
-		boolean playerHasAce = hasAce(deck.playerHand);
-		boolean dealerHasAce = hasAce(deck.dealerHand);
-
 		// display the player's hand and evaluate win/loss conditions
-		for (Card card : deck.playerHand) {
-			playerTotal += card.getValue();
-			playerScore.setText(sPlayerScore + playerTotal);
-
-			if (playerTotal > 21 && playerHasAce) {
-				changeAceValue(deck.playerHand);
-				playerTotal -= 10; // Ace gets the value of 1
-				playerScore.setText(sPlayerScore + playerTotal);
-				playerHasAce = false;
-			} else if (playerTotal > 21) {
-				result.setText("BUST! -" + betAmount);
-				playing = false;
-				deck.holeCard.setCover(false);
-				playerCash.setText(sPlayerCash + playerBalance);
-				betField.setText("0");
-			}
-			// check to see if the player has any money left to play with
-			if (playerBalance == 0 && Integer.parseInt(betField.getText()) == 0) {
-				gameOverScreen = true;
-			}
+		playerTotal = handValue(deck.playerHand);
+		playerScore.setText(sPlayerScore + playerTotal);
+		if (playerTotal > 21) {
+			result.setText("BUST! -" + betAmount);
+			playing = false;
+			deck.holeCard.setCover(false);
+			playerCash.setText(sPlayerCash + playerBalance);
+			betField.setText("0");
+		}
+		// check to see if the player has any money left to play with
+		if (playerBalance == 0 && Integer.parseInt(betField.getText()) == 0) {
+			gameOverScreen = true;
 		}
 
 		// display the dealer's hand and win/loss conditions
-		for (Card card : deck.dealerHand) {
-			betAmount = Integer.parseInt(betField.getText());
-			dealerTotal += card.getValue();
-			dealerScore.setText(sDealerScore + dealerTotal);
+		betAmount = Integer.parseInt(betField.getText());
+		dealerTotal = handValue(deck.dealerHand);
+		dealerScore.setText(sDealerScore + dealerTotal);
+		if (dealerTotal > 21) {
+			result.setText("DEALER BUST! +" + betAmount*2);
+			playing = false;
+			playerBalance += betAmount*2;
+			playerCash.setText(sPlayerCash + playerBalance);
+			betField.setText("0");
+		}
 
-			if (dealerTotal > 21 && dealerHasAce) {
-				changeAceValue(deck.playerHand);
-				dealerTotal -= 10;
-				dealerScore.setText(sDealerScore  + dealerTotal);
-				dealerHasAce = false;
-			} else if (dealerTotal > 21) {
-				result.setText("DEALER BUST! +" + betAmount*2);
-				playing = false;
-				playerBalance += betAmount*2;
-				playerCash.setText(sPlayerCash + playerBalance);
-				betField.setText("0");
-			}
-
-			// will only display the value of the faced up card (the one in
-			// position 0) as long as holeCard is true (visible)
-			if (deck.holeCard.isCover()) {
-				dealerScore.setText(sDealerScore
-						+ deck.dealerHand.get(0).getValue());
-			}
+		// will only display the value of the faced up card (the one in
+		// position 0) as long as holeCard is true (visible)
+		if (deck.holeCard.isCover()) {
+			dealerScore.setText(sDealerScore
+					+ deck.dealerHand.get(0).getValue());
 		}
 
 	} // end updateScores()
-
+	
+	// (CALEB) Used to evaluate the total value of the hand, handles aces with no further code
+	public static int handValue(List<Card> hand){
+	      int total = 0;
+	      int numOfAces = 0;
+	      for(Card c: hand){
+	         if(c.getValue() == 11){
+	            numOfAces++;
+	         }
+	         total += c.getValue();;
+	      }
+	      
+	      while(total > 21 && numOfAces > 0){
+	         numOfAces--;
+	         total -= 10;
+	      }
+	      
+	      return total;
+	   }
+	
 	// used for the bet increase/decrease buttons
 	public void changeBet(int amount) {
 		if (!playing) {
 			int betAmount = Integer.parseInt(betField.getText());
 			if (amount > 0 && (playerBalance - amount) >= 0) {
-				betAmount += amount;
-				//playerBalance = playerBalance - amount;
+				betAmount += amount; // Positive
 			} else if (amount < 0 && betAmount >= Math.abs(amount)) {
-				betAmount += amount;
-				//betAmount = betAmount - Math.abs(amount);
-				//playerBalance = playerBalance + Math.abs(amount);
+				betAmount += amount; // Negative
 			}
-			bet(betAmount);
+			
+			if(betAmount > playerBalance)
+			  betField.setText(""+ playerBalance);
+			else
+				betField.setText(""+betAmount);
 		}
 	} // end changeBet()
 	

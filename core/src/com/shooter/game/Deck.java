@@ -48,14 +48,14 @@ public class Deck {
 			System.out.println(c.toString());
 		}
 	}
-	
+	/* (CALEB) Commented out due to update in tabulating aces 
 	public void resetAceValue(){
 		for(Card c : cards){
 			if(c.getRank() == "ACE"){
 				c.setValue(11);
 			}
 		}
-	}
+	}*/
 	
 	public void deal(){
 		// run hit four times.
