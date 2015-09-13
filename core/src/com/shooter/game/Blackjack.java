@@ -617,6 +617,7 @@ public class Blackjack extends ApplicationAdapter {
 			gameOverScreen = true;
 			deck = new Deck(cardSpriteSheet);	
 			elapsedTime = 0;
+			playerBalance = 1;
 		} else
 			elapsedTime += Gdx.graphics.getDeltaTime();
 	}
