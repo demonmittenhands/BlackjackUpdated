@@ -29,6 +29,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField.TextFieldListener;
+import com.badlogic.gdx.scenes.scene2d.ui.TextField.TextFieldStyle;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 
 public class Blackjack extends ApplicationAdapter {
@@ -154,6 +155,13 @@ public class Blackjack extends ApplicationAdapter {
 		labelStyle.font = new BitmapFont();
 		LabelStyle chipLabelStyle = new LabelStyle();
 		chipLabelStyle.font = new BitmapFont();
+		
+		// make textFieldStyle
+		TextFieldStyle textFieldStyle = new TextFieldStyle();
+		textFieldStyle.background = skin.newDrawable("textFieldSkin",
+				Color.WHITE);
+		textFieldStyle.fontColor = Color.BLACK;
+		textFieldStyle.font = new BitmapFont();
 
 		// making the UI
 		// the labels (hand totals and cash)
@@ -341,8 +349,6 @@ public class Blackjack extends ApplicationAdapter {
 		final TextButton betMore500 = getButton(" ", 120, 390, "betMore500",
 				betMoreButtonStyle);
 
-		
-		Skin textFieldStyle = null;
 		// the Username entry box
 		userField = new TextField(username, textFieldStyle);
 		userField.setTextFieldListener(new TextFieldListener() {
